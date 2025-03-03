@@ -1,0 +1,80 @@
+.container {
+  background-color: #f8f8f8;
+  padding: 20rpx;
+}
+
+/* 顶部tab */
+.tab-bar {
+  display: flex;
+  margin-bottom: 20rpx;
+}
+
+.tab-button {
+  flex: 1;
+  font-size: 30rpx;
+  background-color: #ddd;
+  color: #333;
+  padding: 20rpx 0;
+  text-align: center;
+  border: none;
+  border-radius: 10rpx;
+  margin-right: 10rpx;
+}
+.tab-button:last-child {
+  margin-right: 0;
+}
+.tab-button.active {
+  background-color: #00aa00;
+  color: #fff;
+}
+
+/* 提示文字 */
+.search-prompt {
+  margin-top: 80rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 排序picker */
+.picker-view {
+  margin-bottom: 15rpx;
+  padding: 15rpx;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10rpx;
+  font-size: 28rpx;
+}
+
+/* 清除搜索按钮 */
+.clear-btn {
+  display: block;
+  background-color: red;
+  color: #fff;
+  font-size: 28rpx;
+  text-align: center;
+  padding: 15rpx;
+  border-radius: 8rpx;
+  margin-bottom: 20rpx;
+  margin-top: 10rpx;
+}
+
+/* 无数据提示 */
+.no-data {
+  text-align: center;
+  font-size: 28rpx;
+  color: #999;
+  margin-top: 60rpx;
+}
+
+/* 数据列表样式 */
+.ride-item, .request-item {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+.label {
+  font-weight: bold;
+}

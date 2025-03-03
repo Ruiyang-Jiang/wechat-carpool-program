@@ -1,0 +1,23 @@
+<view class="container">
+  <!-- 搜索顺风车(车找人) -->
+  <view class="search-block">
+    <text class="title">搜索车找人</text>
+    <input placeholder="出发地" data-field="searchDeparture" bindinput="onInputChange" />
+    <input placeholder="目的地" data-field="searchDestination" bindinput="onInputChange" />
+    <picker mode="date" bindchange="onSearchDateChange">
+      <view>{{searchDate ? searchDate : '请选择日期'}}</view>
+    </picker>
+    <button bindtap="searchRides">搜索</button>
+  </view>
+
+  <!-- 搜索人找车(人找司机) -->
+  <view class="search-block">
+    <text class="title">搜索人找车</text>
+    <input placeholder="出发地" data-field="search2Departure" bindinput="onInputChange" />
+    <input placeholder="目的地" data-field="search2Destination" bindinput="onInputChange" />
+    <picker mode="date" bindchange="onSearch2DateChange">
+      <view>{{search2Date ? search2Date : '请选择日期'}}</view>
+    </picker>
+    <button bindtap="searchPeople">搜索</button>
+  </view>
+</view>

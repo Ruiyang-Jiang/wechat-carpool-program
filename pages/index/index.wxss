@@ -1,0 +1,80 @@
+/* 设置整体页面背景和基本间距 */
+.container {
+  padding: 30rpx;
+  background-color: #f8f8f8;
+}
+
+/* 统一搜索块样式 */
+.search-block {
+  margin-bottom: 40rpx;
+  padding: 30rpx;
+  border-radius: 12rpx;
+  background-color: #fff;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 标题样式 */
+.search-block .title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  color: #333;
+}
+
+/* 输入框样式 */
+.search-block input {
+  display: block;
+  width: 100%;
+  padding: 20rpx;
+  font-size: 32rpx;
+  border: 1px solid #ddd;
+  border-radius: 10rpx;
+  margin-bottom: 20rpx;
+  background-color: #f9f9f9;
+}
+
+/* 日期选择框样式 */
+.search-block picker {
+  display: block;
+  width: 100%;
+  padding: 20rpx;
+  font-size: 32rpx;
+  border: 1px solid #ddd;
+  border-radius: 10rpx;
+  background-color: #f9f9f9;
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+/* 按钮样式 */
+.search-block button {
+  width: 100%;
+  padding: 20rpx;
+  font-size: 34rpx;
+  border-radius: 12rpx;
+  background-color: #00aa00;
+  color: #fff;
+  text-align: center;
+  font-weight: bold;
+  border: none;
+  transition: background 0.3s ease;
+}
+
+/* 按钮点击效果 */
+.search-block button:active {
+  background-color: #008000;
+}
+
+/* 让页面自适应不同屏幕 */
+@media screen and (max-width: 400px) {
+  .search-block {
+    padding: 20rpx;
+  }
+  .search-block input,
+  .search-block picker,
+  .search-block button {
+    font-size: 28rpx;
+    padding: 15rpx;
+  }
+}

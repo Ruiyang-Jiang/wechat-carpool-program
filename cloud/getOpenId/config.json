@@ -1,0 +1,5 @@
+{
+  "name": "getOpenId",
+  "timeout": 5,
+  "memorySize": 128
+}

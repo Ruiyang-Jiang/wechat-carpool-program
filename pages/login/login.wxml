@@ -1,0 +1,6 @@
+<view class="container">
+  <image class="logo" src="../../images/connection_lost.png"></image>
+  <text class="title">欢迎使用顺风车</text>
+
+  <button class="login-btn" bindtap="login">微信一键登录</button>
+</view>

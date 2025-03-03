@@ -1,0 +1,53 @@
+<view class="container">
+  <!-- 用户信息展示 -->
+  <view class="user-info">
+    <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+    <text class="nickname">{{userInfo.nickname || "微信用户"}}</text>
+  </view>
+
+  <!-- 用户联系方式 -->
+  <view class="user-contact">
+    <view class="info-row">
+      <text class="label">手机号：</text>
+      <input class="input" placeholder="请输入手机号" value="{{userInfo.phone}}" bindinput="updatePhone"/>
+    </view>
+    <view class="info-row">
+      <text class="label">微信号：</text>
+      <input class="input" placeholder="请输入微信号" value="{{userInfo.wechat}}" bindinput="updateWechat"/>
+    </view>
+    <button class="save-btn" bindtap="saveUserInfo">更新信息</button>
+  </view>
+
+  <!-- 订单切换 -->
+  <view class="tab-switch">
+    <text class="tab {{currentTab === 'passenger' ? 'active' : ''}}" bindtap="switchToPassenger">我乘坐的</text>
+    <text class="tab {{currentTab === 'driver' ? 'active' : ''}}" bindtap="switchToDriver">我接单的</text>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="ride-list">
+    <block wx:if="{{currentTab === 'passenger'}}">
+      <block wx:for="{{ridesAsPassenger}}" wx:key="id">
+        <view class="ride-card">
+          <text>出发地: {{item.departure_place}}</text>
+          <text>目的地: {{item.arrival_place}}</text>
+          <text>出发时间: {{item.departure_date}} {{item.departure_time}}</text>
+          <text>价格: ¥{{item.price}}</text>
+        </view>
+      </block>
+    </block>
+
+    <block wx:if="{{currentTab === 'driver'}}">
+      <block wx:for="{{ridesAsDriver}}" wx:key="id">
+        <view class="ride-card">
+          <text>乘客: {{item.passengers.length}} 人</text>
+          <text>出发地: {{item.departure_place}}</text>
+          <text>目的地: {{item.arrival_place}}</text>
+          <text>出发时间: {{item.departure_date}} {{item.departure_time}}</text>
+          <text>剩余座位: {{item.empty_seats}}</text>
+          <text>剩余座位: {{item.price}}</text>
+        </view>
+      </block>
+    </block>
+  </view>
+</view>

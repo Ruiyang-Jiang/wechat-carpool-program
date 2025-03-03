@@ -1,0 +1,117 @@
+/* 容器 */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* 头部 */
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #007aff;
+  color: white;
+  padding: 12px;
+  font-size: 18px;
+}
+
+.chat-title {
+  font-weight: bold;
+}
+
+.wechat-btn {
+  background-color: #ff5722;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* 消息区域 */
+.message-container {
+  flex-grow: 1;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 消息项 */
+.message-item {
+  display: flex;
+  align-items: flex-end;
+  margin: 8px 0;
+  max-width: 80%;
+}
+
+.sent {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.received {
+  align-self: flex-start;
+  flex-direction: row;
+}
+
+/* 头像 */
+.message-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin: 0 8px;
+}
+
+/* 气泡 */
+.message-bubble {
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sent .message-bubble {
+  background-color: #007aff;
+  color: white;
+  align-items: flex-end;
+}
+
+.received .message-bubble {
+  background-color: #ddd;
+  color: black;
+}
+
+/* 消息时间 */
+.message-time {
+  font-size: 12px;
+  color: gray;
+  align-self: flex-end;
+  margin-top: 4px;
+}
+
+/* 底部输入框 */
+.input-container {
+  display: flex;
+  padding: 10px;
+  background-color: white;
+  border-top: 1px solid #ccc;
+}
+
+.message-input {
+  flex-grow: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.send-btn {
+  background-color: #007aff;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin-left: 8px;
+}
