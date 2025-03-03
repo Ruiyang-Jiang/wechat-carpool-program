@@ -160,19 +160,9 @@ Page({
           passenger_number: parseInt(passenger_number) || 1,
           price: parseFloat(price) || 0
         }
-      }).then(res => {
-        // 更新 users 表: as_passenger
-        db.collection('users').where({ openid }).update({
-          data: {
-            as_passenger: db.command.push(res._id)
-          }
-        }).then(() => {
+      }).then(() => {
           wx.showToast({ title: '发布成功', icon: 'success' });
           this.resetForm();
-        }).catch(err => {
-          console.error('更新用户表失败:', err);
-          wx.showToast({ title: '用户关联失败', icon: 'none' });
-        });
       }).catch(err => {
         console.error('rideRequest 发布失败:', err);
         wx.showToast({ title: '发布失败', icon: 'none' });
@@ -194,20 +184,10 @@ Page({
           passengers: [],
           status: 'open'
         }
-      }).then(res => {
-        // 更新 users 表: as_driver
-        db.collection('users').where({ openid }).update({
-          data: {
-            as_driver: db.command.push(res._id)
-          }
-        }).then(() => {
+      }).then(() => {
           wx.showToast({ title: '发布成功', icon: 'success' });
           this.resetForm();
         }).catch(err => {
-          console.error('更新用户表失败:', err);
-          wx.showToast({ title: '用户关联失败', icon: 'none' });
-        });
-      }).catch(err => {
         console.error('rides 发布失败:', err);
         wx.showToast({ title: '发布失败', icon: 'none' });
       });
