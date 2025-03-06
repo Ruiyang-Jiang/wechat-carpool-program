@@ -7,7 +7,8 @@
     "pages/myinfo/myinfo",
     "pages/chat/chat",
     "pages/messages/messages",
-    "pages/publish/publish"
+    "pages/publish/publish",
+    "pages/detail/detail"
   ],
   "window": {
     "navigationBarTextStyle": "black",

@@ -252,5 +252,13 @@ Page({
         return order === "asc" ? valA - valB : valB - valA;
       }
     });
+  },
+  chooseItem(e) {
+    const itemId = e.currentTarget.dataset.id;
+    const itemType = e.currentTarget.dataset.type; // "rides" or "request"
+    // 跳转到 detail page
+    wx.navigateTo({
+      url: `/pages/detail/detail?type=${itemType}&id=${itemId}`
+    })
   }
 });

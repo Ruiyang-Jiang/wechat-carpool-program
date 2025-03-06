@@ -151,6 +151,7 @@ Page({
       // 【乘客】=> rideRequest 集合
       db.collection('rideRequest').add({
         data: {
+          publisher_id: openid, // 新增发布者id
           departure_place,
           departure_date,
           departure_time,
@@ -172,6 +173,7 @@ Page({
       // 【司机】=> rides 集合
       db.collection('rides').add({
         data: {
+          publisher_id: openid, // 新增发布者id
           departure_place,
           departure_date,
           departure_time,

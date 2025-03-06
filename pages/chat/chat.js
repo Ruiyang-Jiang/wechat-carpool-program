@@ -7,7 +7,12 @@ Page({
     messageContent: "",
     driver_wechat: "",
     pending_passengers: [],
-    confirmed_passengers: []
+    confirmed_passengers: [],
+    messages: [
+      // Example message structure
+      { id: 1, content: 'Hello!', isUser: true },
+      { id: 2, content: 'Hi there!', isUser: false }
+    ]
   },
 
   onLoad(options) {
@@ -75,5 +80,17 @@ Page({
 
   scrollToBottom() {
     this.setData({ scrollTop: 99999 });
+  },
+
+  // Function to add a new message
+  addMessage(content, isUser) {
+    const newMessage = {
+      id: this.data.messages.length + 1,
+      content,
+      isUser
+    };
+    this.setData({
+      messages: [...this.data.messages, newMessage]
+    });
   }
 });

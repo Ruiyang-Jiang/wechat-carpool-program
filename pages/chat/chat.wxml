@@ -7,13 +7,9 @@
 
   <!-- 消息展示区域 -->
   <scroll-view scroll-y="true" class="message-container">
-    <block wx:for="{{messages}}" wx:key="index">
-      <view class="message-item {{item.user_id === user_id ? 'sent' : 'received'}}">
-        <image class="message-avatar" src="{{item.avatar || '/assets/default-avatar.png'}}"></image>
-        <view class="message-bubble">
-          <text class="message-content">{{item.content}}</text>
-          <text class="message-time">{{item.timestamp}}</text>
-        </view>
+    <block wx:for="{{messages}}" wx:key="{{item.id}}">
+      <view class="message {{item.isUser ? 'user-message' : 'publisher-message'}}">
+        <text>{{item.content}}</text>
       </view>
     </block>
   </scroll-view>

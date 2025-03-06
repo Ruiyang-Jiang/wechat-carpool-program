@@ -115,3 +115,27 @@
   border-radius: 6px;
   margin-left: 8px;
 }
+
+.chat-container {
+  padding: 20rpx;
+}
+
+.message {
+  max-width: 70%;
+  margin-bottom: 10rpx;
+  padding: 10rpx;
+  border-radius: 10rpx;
+  word-wrap: break-word;
+}
+
+.user-message {
+  background-color: #dcf8c6;
+  align-self: flex-end;
+  text-align: right;
+}
+
+.publisher-message {
+  background-color: #ffffff;
+  align-self: flex-start;
+  text-align: left;
+}

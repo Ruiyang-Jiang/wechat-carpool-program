@@ -1,41 +1,25 @@
 Page({
   data: {
-    chats: []
+    chatItems: []
   },
 
   onLoad() {
-    this.loadChats();
+    this.loadChatItems();
   },
 
-  loadChats() {
+  loadChatItems() {
     const db = wx.cloud.database();
-    const userId = wx.getStorageSync("user_id");
-
-    db.collection("rides").where({
-      messages: db.command.neq([])
+    db.collection("messages").where({
+      user_id: wx.getStorageSync("user_id")
     }).get().then(res => {
-      let chatList = [];
-      res.data.forEach(ride => {
-        ride.messages.forEach(msg => {
-          if (msg.user_id !== userId) {
-            chatList.push({
-              ride_id: ride._id,
-              user_name: msg.user_name,
-              avatar: msg.avatar,
-              last_message: msg.content,
-              timestamp: msg.timestamp
-            });
-          }
-        });
-      });
-
-      this.setData({ chats: chatList });
+      this.setData({ chatItems: res.data });
     });
   },
 
-  goToChat(e) {
+  navigateToChat(e) {
+    const { rideId } = e.currentTarget.dataset;
     wx.navigateTo({
-      url: `/pages/chat/chat?rideId=${e.currentTarget.dataset.rideid}`
+      url: `/pages/detail/detail?type=rides&id=${rideId}`
     });
   }
 });

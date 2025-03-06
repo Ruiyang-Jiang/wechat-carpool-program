@@ -1,126 +1,174 @@
+// pages/myinfo/myinfo.js
+const db = wx.cloud.database();
+
 Page({
   data: {
-    userInfo: {}, // 存储用户信息
-    loggedIn: false, // 是否已登录
-    ridesAsDriver: [], // 作为司机的顺风车
-    ridesAsPassenger: [], // 作为乘客的顺风车
-    currentTab: "passenger" // 默认显示"我乘坐的"
+    userInfo: {},
+    loggedIn: false,
+    currentTab: "passenger",  // "passenger" | "driver" | "mine"
+
+    ridesAsDriver: [],   // 我接单的
+    ridesAsPassenger: [], // 我乘坐的
+    myPublishedRides: [],       // 我发布的 rides
+    myPublishedRequests: [],    // 我发布的 rideRequest
   },
 
-  /**
-   * 页面加载时触发
-   */
   onLoad() {
     this.checkLoginStatus();
   },
 
-  /**
-   * 检查用户是否已登录并加载数据
-   */
   checkLoginStatus() {
-    const db = wx.cloud.database();
     const openid = wx.getStorageSync("openid");
-
     if (!openid) {
-      wx.showToast({
-        title: "请先登录",
-        icon: "none"
-      });
+      wx.showToast({ title: "请先登录", icon: "none" });
       return;
     }
 
     // 加载用户信息
-    db.collection("users").where({ openid }).get().then((res) => {
+    db.collection("users").where({ openid }).get().then(res => {
       if (res.data.length > 0) {
         const userInfo = res.data[0];
-        this.setData({
-          userInfo,
-          loggedIn: true
-        });
-
-        // 加载"我乘坐的" & "我接单的" 顺风车
+        this.setData({ userInfo, loggedIn: true });
+        // 加载"我乘坐的/我接单的"
         this.loadRides(userInfo);
+        // 加载"我发布的"
+        this.loadMyPublished();
       } else {
         wx.showToast({ title: "用户信息不存在", icon: "none" });
       }
-    }).catch((err) => {
+    }).catch(err => {
       console.error("获取用户信息失败:", err);
     });
   },
 
-  /**
-   * 加载用户的顺风车信息
-   */
   loadRides(userInfo) {
-    const db = wx.cloud.database();
-
-    // ✅ 修正：确保 `as_passenger` 存在且是数组
+    // 我乘坐的
     if (Array.isArray(userInfo.as_passenger) && userInfo.as_passenger.length > 0) {
       db.collection("rides")
         .where({ _id: db.command.in(userInfo.as_passenger) })
         .get()
-        .then((res) => {
+        .then(res => {
           this.setData({ ridesAsPassenger: res.data });
-          console.log("我乘坐的顺风车:", res.data);
         })
-        .catch((err) => {
-          console.error("获取乘坐顺风车信息失败:", err);
-        });
-    } else {
-      console.warn("as_passenger 字段为空或不存在");
+        .catch(err => console.error("获取乘坐信息失败:", err));
     }
-
-    // ✅ 修正：确保 `as_driver` 存在且是数组
+    // 我接单的
     if (Array.isArray(userInfo.as_driver) && userInfo.as_driver.length > 0) {
       db.collection("rides")
         .where({ _id: db.command.in(userInfo.as_driver) })
         .get()
-        .then((res) => {
+        .then(res => {
           this.setData({ ridesAsDriver: res.data });
-          console.log("我接单的顺风车:", res.data);
         })
-        .catch((err) => {
-          console.error("获取接单顺风车信息失败:", err);
-        });
-    } else {
-      console.warn("as_driver 字段为空或不存在");
+        .catch(err => console.error("获取接单信息失败:", err));
     }
   },
 
+  // 加载我发布过的 rides & rideRequest
+  loadMyPublished() {
+    const openid = this.data.userInfo.openid;
+    // 我发布的 rides
+    db.collection("rides").where({
+      publisher_id: openid
+    }).get().then(res => {
+      this.setData({ myPublishedRides: res.data });
+    }).catch(err => console.error("加载我发布的 rides 失败:", err));
 
-  /**
-   * 切换到 "我乘坐的" 订单
-   */
+    // 我发布的 rideRequest
+    db.collection("rideRequest").where({
+      publisher_id: openid
+    }).get().then(res => {
+      this.setData({ myPublishedRequests: res.data });
+    }).catch(err => console.error("加载我发布的 rideRequest 失败:", err));
+  },
+
+// **更新价格**
+  updatePrice(e) {
+    const rideId = e.currentTarget.dataset.id;
+    const newPrice = e.detail.value;
+
+    const updatedRides = this.data.myPublishedRides.map(ride => {
+      if (ride._id === rideId) {
+        return { ...ride, price: newPrice };
+      }
+      return ride;
+    });
+
+    this.setData({ myPublishedRides: updatedRides });
+  },
+
+  // **更新空余座位**
+  updateSeats(e) {
+    const rideId = e.currentTarget.dataset.id;
+    const newSeats = e.detail.value;
+
+    const updatedRides = this.data.myPublishedRides.map(ride => {
+      if (ride._id === rideId) {
+        return { ...ride, empty_seats: newSeats };
+      }
+      return ride;
+    });
+
+    this.setData({ myPublishedRides: updatedRides });
+  },
+
+  // tab 切换
   switchToPassenger() {
     this.setData({ currentTab: "passenger" });
   },
-
-  /**
-   * 切换到 "我接单的" 订单
-   */
   switchToDriver() {
     this.setData({ currentTab: "driver" });
   },
+  switchToMine() {
+    this.setData({ currentTab: "mine" });
+  },
 
-  /**
-   * 绑定输入框，更新用户手机号
-   */
+  deletePublishedRide(e) {
+    const rideId = e.currentTarget.dataset.id;
+    db.collection("rides").doc(rideId).remove().then(() => {
+      wx.showToast({ title: "删除成功", icon: "success" });
+      this.loadMyPublished();
+    }).catch(err => {
+      console.error("删除失败:", err);
+      wx.showToast({ title: "删除失败", icon: "none" });
+    });
+  },
+
+  editPublishedRequest(e) {
+    const requestId = e.currentTarget.dataset.id;
+    wx.navigateTo({ url: `/pages/editRequest/editRequest?id=${requestId}` });
+  },
+
+
+  // **保存修改到数据库**
+  saveUpdates(e) {
+    const rideId = e.currentTarget.dataset.id;
+    const updatedRide = this.data.myPublishedRides.find(ride => ride._id === rideId);
+    
+    if (!updatedRide) return;
+
+    db.collection("rides").doc(rideId).update({
+      data: {
+        price: parseFloat(updatedRide.price) || 0,
+        empty_seats: parseInt(updatedRide.empty_seats) || 0
+      }
+    }).then(() => {
+      wx.showToast({ title: "更新成功", icon: "success" });
+      this.loadMyPublished(); // Reload data
+    }).catch(err => {
+      console.error("更新失败:", err);
+      wx.showToast({ title: "更新失败", icon: "none" });
+    });
+  },
+
+  // 更新手机号/微信
   updatePhone(e) {
     this.setData({ "userInfo.phone": e.detail.value });
   },
-
-  /**
-   * 绑定输入框，更新用户微信号
-   */
   updateWechat(e) {
     this.setData({ "userInfo.wechat": e.detail.value });
   },
-
-  /**
-   * 提交更新用户信息
-   */
   saveUserInfo() {
-    const db = wx.cloud.database();
     db.collection("users").where({ openid: this.data.userInfo.openid }).update({
       data: {
         phone: this.data.userInfo.phone,
@@ -128,9 +176,76 @@ Page({
       }
     }).then(() => {
       wx.showToast({ title: "更新成功", icon: "success" });
-    }).catch((err) => {
+    }).catch(err => {
       console.error("更新用户信息失败:", err);
       wx.showToast({ title: "更新失败", icon: "none" });
+    });
+  },
+
+  updateRequestPrice(e) {
+    const requestId = e.currentTarget.dataset.id;
+    const newPrice = e.detail.value;
+
+    const updatedRequests = this.data.myPublishedRequests.map(request => {
+      if (request._id === requestId) {
+        return { ...request, price: newPrice };
+      }
+      return request;
+    });
+
+    this.setData({ myPublishedRequests: updatedRequests });
+  },
+
+  updatePassengerNumber(e) {
+    const requestId = e.currentTarget.dataset.id;
+    const newPassengerNumber = e.detail.value;
+
+    const updatedRequests = this.data.myPublishedRequests.map(request => {
+      if (request._id === requestId) {
+        return { ...request, passenger_number: newPassengerNumber };
+      }
+      return request;
+    });
+
+    this.setData({ myPublishedRequests: updatedRequests });
+  },
+
+  saveRequestUpdates(e) {
+    const requestId = e.currentTarget.dataset.id;
+    const updatedRequest = this.data.myPublishedRequests.find(request => request._id === requestId);
+
+    if (!updatedRequest) return;
+
+    db.collection("rideRequest").doc(requestId).update({
+      data: {
+        price: parseFloat(updatedRequest.price) || 0,
+        passenger_number: parseInt(updatedRequest.passenger_number) || 0
+      }
+    }).then(() => {
+      wx.showToast({ title: "更新成功", icon: "success" });
+      this.loadMyPublished(); // Reload data
+    }).catch(err => {
+      console.error("更新失败:", err);
+      wx.showToast({ title: "更新失败", icon: "none" });
+    });
+  },
+
+  deletePublishedRequest(e) {
+    const requestId = e.currentTarget.dataset.id;
+    db.collection("rideRequest").doc(requestId).remove().then(() => {
+      wx.showToast({ title: "删除成功", icon: "success" });
+      this.loadMyPublished();
+    }).catch(err => {
+      console.error("删除失败:", err);
+      wx.showToast({ title: "删除失败", icon: "none" });
+    });
+  },
+
+  // Add a method to navigate to the detail page
+  navigateToDetail(e) {
+    const { id, type } = e.currentTarget.dataset;
+    wx.navigateTo({
+      url: `/pages/detail/detail?type=${type}&id=${id}`
     });
   }
 });

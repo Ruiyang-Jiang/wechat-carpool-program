@@ -1,0 +1,56 @@
+<view class="container">
+  <!-- 发布者信息 -->
+  <view class="publisher-info">
+    <text class="title">发布者信息</text>
+    <text class="info">姓名: {{publisherInfo.nickname || '未知'}}</text>
+    <text class="info">微信: {{publisherInfo.wechat || '未提供'}}</text>
+    <text class="info">电话: {{publisherInfo.phone || '未提供'}}</text>
+  </view>
+
+  <!-- 顺风车/人找车信息 -->
+  <view class="detail-card">
+    <text class="title">顺风车详情</text>
+    <view class="detail-row">
+      <text class="label">出发地:</text>
+      <text>{{detail.departure_place}}</text>
+    </view>
+    <view class="detail-row">
+      <text class="label">目的地:</text>
+      <text>{{detail.arrival_place}}</text>
+    </view>
+    <view class="detail-row">
+      <text class="label">出发时间:</text>
+      <text>{{detail.departure_date}} {{detail.departure_time || '未知'}}</text>
+    </view>
+    <view class="detail-row">
+      <text class="label">价格:</text>
+      <text>¥{{detail.price}}</text>
+    </view>
+    <view wx:if="{{itemType === 'rides'}}" class="detail-row">
+      <text class="label">空余座位:</text>
+      <text>{{detail.empty_seats}}</text>
+    </view>
+  </view>
+
+  <!-- 交流区 -->
+  <view class="chat-section">
+    <text class="title">交流区</text>
+    <scroll-view scroll-y="true" class="message-box">
+      <block wx:for="{{messages}}" wx:key="index">
+        <view class="message">
+          <text class="user">{{item.userNickname}}:</text>
+          <text class="content">{{item.content}}</text>
+        </view>
+      </block>
+    </scroll-view>
+    <input class="message-input" placeholder="输入消息..." bindinput="onMessageInput" />
+    <button class="send-btn" bindtap="sendMessage">发送</button>
+  </view>
+
+  <!-- 接单按钮 -->
+  <view class="button-section">
+    <button class="accept-btn" bindtap="takeOrder">接单</button>
+    <button class="edit-btn" wx:if="{{isOwner}}" bindtap="editItem">修改</button>
+    <button class="delete-btn" wx:if="{{isOwner}}" bindtap="deleteItem">删除</button>
+  </view>
+</view>

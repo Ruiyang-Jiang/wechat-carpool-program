@@ -1,14 +1,10 @@
 <view class="container">
   <text class="page-title">消息</text>
 
-  <block wx:for="{{chats}}" wx:key="id">
-    <view class="chat-item" bindtap="goToChat" data-rideid="{{item.ride_id}}">
-      <image class="avatar" src="{{item.avatar || '/assets/default-avatar.png'}}"></image>
-      <view class="chat-info">
-        <text class="chat-name">{{item.user_name}}</text>
-        <text class="last-message">{{item.last_message}}</text>
-      </view>
-      <text class="chat-time">{{item.timestamp}}</text>
+  <block wx:for="{{chatItems}}" wx:key="{{item.id}}">
+    <view class="chat-item" bindtap="navigateToChat" data-ride-id="{{item.rideId}}">
+      <text class="chat-title">{{item.title}}</text>
+      <text class="chat-preview">{{item.lastMessage}}</text>
     </view>
   </block>
 </view>
