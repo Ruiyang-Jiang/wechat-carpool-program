@@ -32,21 +32,6 @@
     </view>
   </view>
 
-  <!-- 交流区 -->
-  <view class="chat-section">
-    <text class="title">交流区</text>
-    <scroll-view scroll-y="true" class="message-box">
-      <block wx:for="{{messages}}" wx:key="index">
-        <view class="message">
-          <text class="user">{{item.userNickname}}:</text>
-          <text class="content">{{item.content}}</text>
-        </view>
-      </block>
-    </scroll-view>
-    <input class="message-input" placeholder="输入消息..." bindinput="onMessageInput" />
-    <button class="send-btn" bindtap="sendMessage">发送</button>
-  </view>
-
   <!-- 接单按钮 -->
   <view class="button-section">
     <button class="accept-btn" bindtap="takeOrder">接单</button>

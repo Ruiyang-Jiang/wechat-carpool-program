@@ -83,11 +83,71 @@
 }
 
 .ride-item {
-  background: #fff;
+  margin: 20rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.ride-header {
   padding: 20rpx;
-  border-radius: 12rpx;
-  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
-  margin-bottom: 20rpx;
+  background: var(--primary-color);
+  color: white;
+}
+
+.date, .time {
+  font-size: 26rpx;
+  opacity: 0.9;
+}
+
+.ride-content {
+  padding: 20rpx;
+  background: white;
+}
+
+.location-info {
+  margin: 15rpx 0;
+}
+
+.departure, .arrival {
+  display: flex;
+  align-items: center;
+  margin: 10rpx 0;
+}
+
+.icon {
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  text-align: center;
+  border-radius: 20rpx;
+  margin-right: 15rpx;
+  font-size: 24rpx;
+  color: white;
+}
+
+.departure .icon {
+  background: var(--primary-color);
+}
+
+.arrival .icon {
+  background: var(--success-color);
+}
+
+.ride-details {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15rpx;
+  padding-top: 15rpx;
+  border-top: 1rpx solid #eee;
+}
+
+.price {
+  color: #ff5722;
+  font-weight: bold;
+}
+
+.seats {
+  color: #666;
 }
 
 input {
@@ -129,8 +189,8 @@ button {
 .section-title {
   font-size: 32rpx;
   font-weight: bold;
-  margin-top: 20rpx;
-  margin-bottom: 10rpx;
+  margin: 30rpx 20rpx 10rpx;
+  color: #333;
 }
 
 .ride-item, .request-item {
@@ -161,14 +221,94 @@ input {
 }
 
 .action-btn {
-  background-color: #007aff;
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.edit-btn {
+  background: #ffa500;
   color: white;
-  padding: 10rpx;
-  border-radius: 6rpx;
-  margin-top: 10rpx;
-  text-align: center;
 }
 
 .delete-btn {
-  background-color: #ff5722;
+  background: #ff5722;
+  color: white;
+}
+
+.action-btn:active {
+  opacity: 0.8;
+}
+
+.action-section {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+
+.scroll-container {
+  height: 100vh;
+}
+
+.tab-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  background: white;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.1);
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab-item.active {
+  color: #007AFF;
+  font-weight: bold;
+}
+
+.tab-item.active:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 4rpx;
+  background: #007AFF;
+  border-radius: 2rpx;
+}
+
+.edit-section {
+  margin: 20rpx 0;
+  padding: 20rpx;
+  background: var(--background);
+  border-radius: 12rpx;
+}
+
+.edit-item {
+  margin: 15rpx 0;
+}
+
+.edit-input {
+  height: 80rpx;
+  padding: 0 20rpx;
+  background: white;
+  border: 2rpx solid var(--border-color);
+  border-radius: 8rpx;
+}
+
+.save-btn {
+  background: #007AFF;
+  color: white;
 }

@@ -6,95 +6,179 @@ Page({
     itemId: "",
     detail: null,    // 具体数据
     publisherInfo: null, // 发布者的信息
-    messages: [],    // 简易交流区
-    newMessage: "",   // 输入的新消息
-    rideId: '',
-    userId: '',
-    rideDetails: {},
-    driverAvatar: '',
-    driverUsername: ''
+    userOpenid: "",  // 当前用户 openid
+    isLoading: true  // 加载状态
   },
 
   onLoad(options) {
+    console.log("Detail page onLoad options:", options);
     const { type, id } = options;
+    
+    if (!type || !id) {
+      wx.showToast({
+        title: '参数错误',
+        icon: 'none'
+      });
+      setTimeout(() => wx.navigateBack(), 1500);
+      return;
+    }
+
+    // 先获取用户openid
+    const userOpenid = wx.getStorageSync("openid");
+    
     this.setData({
       itemType: type,
       itemId: id,
-      rideId: id,
-      userId: wx.getStorageSync('user_id')
-    }, () => {
-      this.loadDetail();
+      userOpenid: userOpenid,
+      isLoading: true
     });
+
+    console.log("Initial state:", {
+      itemType: type,
+      itemId: id,
+      userOpenid: userOpenid
+    });
+
+    // 加载详情数据
+    this.loadDetail();
   },
 
-  // 加载条目详情
   loadDetail() {
     const { itemType, itemId } = this.data;
+    console.log("Loading detail for:", itemType, itemId);
+
+    if (!itemId) {
+      console.error("No itemId provided");
+      return;
+    }
+
+    const db = wx.cloud.database();
+    // 修正collection名称判断
     const collectionName = itemType === "rides" ? "rides" : "rideRequest";
+    
     db.collection(collectionName).doc(itemId).get()
       .then(res => {
-        this.setData({ detail: res.data });
+        console.log("Detail data loaded:", res.data);
+        if (!res.data) {
+          throw new Error('No data found');
+        }
+        
+        this.setData({ 
+          detail: res.data,
+          isLoading: false
+        });
+
+        console.log("Current state after loading detail:", {
+          itemType: this.data.itemType,
+          detail: res.data,
+          userOpenid: this.data.userOpenid
+        });
+
         // 加载发布者信息
-        this.loadPublisher(res.data.publisher_id);
-        // 加载交流信息
-        this.loadMessages();
+        if (res.data.publisher_id) {
+          this.loadPublisher(res.data.publisher_id);
+        }
       })
       .catch(err => {
-        console.error("加载详情失败", err);
+        console.error("加载详情失败:", err);
+        wx.showToast({ 
+          title: "加载详情失败", 
+          icon: "none" 
+        });
+        this.setData({ isLoading: false });
       });
   },
 
   loadPublisher(publisherId) {
-    if (!publisherId) return;
-    db.collection("users").where({ _id: publisherId }).get()
+    if (!publisherId) {
+      console.error("No publisherId provided");
+      return;
+    }
+
+    const db = wx.cloud.database();
+    db.collection("users").where({
+      _openid: publisherId
+    }).get()
       .then(res => {
-        if (res.data.length > 0) {
-          const publisher = res.data[0];
+        console.log("Publisher data loaded:", res.data);
+        if (res.data && res.data.length > 0) {
           this.setData({ 
-            publisherInfo: publisher,
-            driverAvatar: publisher.avatarUrl,
-            driverUsername: publisher.nickName
+            publisherInfo: res.data[0]
           });
         }
       })
       .catch(err => {
-        console.error("加载发布者信息失败", err);
+        console.error("加载发布者信息失败:", err);
       });
   },
 
-  loadMessages() {
-    const db = wx.cloud.database();
-    db.collection("rides").doc(this.data.rideId).get().then(res => {
-      this.setData({ messages: res.data.messages || [] });
+  handleCopyWeChat() {
+    if (!this.data.publisherInfo?.wechat) {
+      wx.showToast({
+        title: '未提供微信号',
+        icon: 'none'
+      });
+      return;
+    }
+
+    wx.setClipboardData({
+      data: this.data.publisherInfo.wechat,
+      success: () => {
+        wx.showToast({ 
+          title: '微信号已复制',
+          icon: 'success'
+        });
+      }
     });
   },
 
-  // 简单的交流功能（示例）
-  onMessageInput(e) {
-    this.setData({ newMessage: e.detail.value });
-  },
-  sendMessage() {
-    const msg = this.data.newMessage.trim();
-    if (!msg) return;
-    // 将消息存储到 detail 对象中
-    const userOpenid = wx.getStorageSync("openid");
-    const userNickname = "我"; // 或者从用户信息里取
+  handleTakeRide() {
+    if (!this.data.userOpenid) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
 
-    // 仅示例：将 messages 存到 ride doc 里
-    const collectionName = this.data.itemType === "rides" ? "rides" : "rideRequest";
-    db.collection(collectionName).doc(this.data.itemId).update({
+    if (!this.data.detail) {
+      wx.showToast({ title: '数据加载中', icon: 'none' });
+      return;
+    }
+
+    const db = wx.cloud.database();
+    const rideId = this.data.itemId;
+    const userOpenid = this.data.userOpenid;
+
+    // 检查是否还有空位
+    if (this.data.detail.empty_seats <= 0) {
+      wx.showToast({ title: '已无空余座位', icon: 'none' });
+      return;
+    }
+
+    // 1. 更新 rides 集合
+    db.collection('rides').doc(rideId).update({
       data: {
-        messages: db.command.push({
-          userOpenid,
-          userNickname,
-          content: msg,
-          timestamp: new Date()
-        })
+        empty_seats: db.command.inc(-1),
+        passengers: db.command.addToSet(userOpenid)
       }
     }).then(() => {
-      wx.showToast({ title: "发送成功" });
-      this.setData({ newMessage: "" });
-      this.loadMessages(); // 重新加载
+      // 2. 更新用户的 as_passenger 数组
+      return db.collection('users').where({
+        openid: userOpenid
+      }).update({
+        data: {
+          as_passenger: db.command.addToSet(rideId)
+        }
+      });
+    }).then(() => {
+      wx.showToast({ 
+        title: '乘坐成功', 
+        icon: 'success',
+        success: () => {
+          setTimeout(() => wx.navigateBack(), 1500);
+        }
+      });
+    }).catch(err => {
+      console.error('乘坐失败:', err);
+      wx.showToast({ title: '操作失败', icon: 'none' });
     });
   },
 
@@ -106,99 +190,166 @@ Page({
       return;
     }
 
-    if (this.data.itemType === "rides") {
-      // 乘客点击 => as_passenger
-      const rideId = this.data.itemId;
-      db.collection("users").where({ openid: userOpenid }).update({
+    const db = wx.cloud.database();
+    const { itemType, itemId, detail } = this.data;
+
+    if (itemType === "rides") {
+      // 乘客点击乘坐此车
+      if (detail.empty_seats <= 0) {
+        wx.showToast({ title: "已无空余座位", icon: "none" });
+        return;
+      }
+
+      // 1. 更新 rides 集合中的空位数和乘客列表
+      db.collection("rides").doc(itemId).update({
         data: {
-          as_passenger: db.command.push(rideId)
+          empty_seats: db.command.inc(-1),
+          passengers: db.command.addToSet(userOpenid)
         }
       }).then(() => {
-        wx.showToast({ title: "接单成功", icon: "success" });
+        // 2. 更新用户的乘车记录
+        return db.collection("users").where({
+          openid: userOpenid
+        }).update({
+          data: {
+            as_passenger: db.command.addToSet(itemId)
+          }
+        });
+      }).then(() => {
+        wx.showToast({ 
+          title: "乘坐成功", 
+          icon: "success",
+          success: () => {
+            setTimeout(() => wx.navigateBack(), 1500);
+          }
+        });
+      }).catch(err => {
+        console.error("乘坐失败:", err);
+        wx.showToast({ title: "操作失败", icon: "none" });
       });
+
     } else {
-      // rideRequest => 司机点击 => 从 rideRequest 转移到 rides
+      // 司机接受人找车请求
       const request = this.data.detail;
-      // 1. 在 rides 新建
+      
+      // 1. 在 rides 集合中创建新记录
       db.collection("rides").add({
         data: {
           publisher_id: request.publisher_id,
+          driver_id: userOpenid,
           departure_place: request.departure_place,
           arrival_place: request.arrival_place,
           departure_date: request.departure_date,
           departure_time: request.departure_time,
           price: request.price,
-          has_driver: true,
-          driver_id: userOpenid,
-          empty_seats: request.passenger_number || 3, // Use passenger_number or default
-          status: 'open',
-          car_model: request.car_model || '未知', // Add any other fields needed
-          messages: request.messages || []
+          empty_seats: request.passenger_number || 1,
+          passengers: [request.publisher_id],
+          status: 'accepted',
+          created_at: db.serverDate()
         }
       }).then(res => {
         const newRideId = res._id;
-        // 2. 删除 rideRequest 里的旧记录
-        db.collection("rideRequest").doc(request._id).remove();
 
-        // 3. 更新当前司机 as_driver
-        db.collection("users").where({ openid: userOpenid }).update({
+        // 2. 更新司机的接单记录
+        return db.collection("users").where({
+          openid: userOpenid
+        }).update({
           data: {
-            as_driver: db.command.push(newRideId)
+            as_driver: db.command.addToSet(newRideId)
           }
         }).then(() => {
-          wx.showToast({ title: "转为车找人成功", icon: "success" });
+          // 3. 更新发布者的乘车记录
+          return db.collection("users").where({
+            openid: request.publisher_id
+          }).update({
+            data: {
+              as_passenger: db.command.addToSet(newRideId)
+            }
+          });
+        }).then(() => {
+          // 4. 删除原始请求
+          return db.collection("rideRequest").doc(itemId).remove();
         });
+      }).then(() => {
+        wx.showToast({
+          title: "接单成功",
+          icon: "success",
+          success: () => {
+            setTimeout(() => wx.navigateBack(), 1500);
+          }
+        });
+      }).catch(err => {
+        console.error("接单失败:", err);
+        wx.showToast({ title: "操作失败", icon: "none" });
       });
     }
   },
 
-  // 修改信息（示例）
-  editItem() {
-    // 跳转到编辑页面
-    wx.navigateTo({
-      url: `/pages/editItem/editItem?type=${this.data.itemType}&id=${this.data.itemId}`
-    });
-  },
+  handleAcceptRequest() {
+    if (!this.data.userOpenid) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
 
-  // 删除条目
-  deleteItem() {
-    const collectionName = this.data.itemType === "rides" ? "rides" : "rideRequest";
-    db.collection(collectionName).doc(this.data.itemId).remove().then(() => {
-      wx.showToast({ title: "删除成功", icon: "success" });
-      wx.navigateBack();
-    });
-  },
+    if (!this.data.detail) {
+      wx.showToast({ title: '数据加载中', icon: 'none' });
+      return;
+    }
 
-  loadRideDetails() {
-    db.collection('rides').doc(this.data.rideId).get().then(res => {
-      this.setData({ rideDetails: res.data });
-    });
-  },
+    const db = wx.cloud.database();
+    const requestId = this.data.itemId;
+    const userOpenid = this.data.userOpenid;
+    const requestDetail = this.data.detail;
 
-  acceptRide() {
-    const rideId = this.data.rideId;
-    const userId = this.data.userId;
-
-    // Update the ride to include this user as a passenger
-    db.collection('rides').doc(rideId).update({
+    // 1. 创建新的 ride
+    db.collection('rides').add({
       data: {
-        passengers: db.command.addToSet(userId)
+        publisher_id: requestDetail.publisher_id,
+        driver_id: userOpenid,
+        departure_place: requestDetail.departure_place,
+        arrival_place: requestDetail.arrival_place,
+        departure_date: requestDetail.departure_date,
+        departure_time: requestDetail.departure_time,
+        price: requestDetail.price,
+        empty_seats: requestDetail.passenger_number,
+        passengers: [requestDetail.publisher_id],
+        status: 'accepted',
+        created_at: db.serverDate()
       }
-    }).then(() => {
-      // Update the user's data to include this ride
-      db.collection('users').where({ _id: userId }).update({
+    }).then(res => {
+      const newRideId = res._id;
+      
+      // 2. 更新司机的 as_driver 数组
+      return db.collection('users').where({
+        openid: userOpenid
+      }).update({
         data: {
-          as_passenger: db.command.addToSet(rideId)
+          as_driver: db.command.addToSet(newRideId)
         }
       }).then(() => {
-        wx.showToast({ title: '接单成功', icon: 'success' });
-      }).catch(err => {
-        console.error('更新用户信息失败:', err);
-        wx.showToast({ title: '更新失败', icon: 'none' });
+        // 3. 更新发布者的 as_passenger 数组
+        return db.collection('users').where({
+          openid: requestDetail.publisher_id
+        }).update({
+          data: {
+            as_passenger: db.command.addToSet(newRideId)
+          }
+        });
+      }).then(() => {
+        // 4. 删除原请求
+        return db.collection('rideRequest').doc(requestId).remove();
+      });
+    }).then(() => {
+      wx.showToast({
+        title: '接单成功',
+        icon: 'success',
+        success: () => {
+          setTimeout(() => wx.navigateBack(), 1500);
+        }
       });
     }).catch(err => {
       console.error('接单失败:', err);
-      wx.showToast({ title: '接单失败', icon: 'none' });
+      wx.showToast({ title: '操作失败', icon: 'none' });
     });
   }
 });

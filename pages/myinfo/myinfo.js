@@ -11,6 +11,7 @@ Page({
     ridesAsPassenger: [], // 我乘坐的
     myPublishedRides: [],       // 我发布的 rides
     myPublishedRequests: [],    // 我发布的 rideRequest
+    isRefreshing: false
   },
 
   onLoad() {
@@ -82,13 +83,31 @@ Page({
     }).catch(err => console.error("加载我发布的 rideRequest 失败:", err));
   },
 
-// **更新价格**
-  updatePrice(e) {
-    const rideId = e.currentTarget.dataset.id;
-    const newPrice = e.detail.value;
+  // 下拉刷新处理
+  onRefresh() {
+    this.setData({ isRefreshing: true });
+    
+    // 根据当前标签页刷新对应数据
+    Promise.all([
+      this.loadMyPublished(),
+      this.loadRidesAsPassenger(),
+      this.loadRidesAsDriver()
+    ]).then(() => {
+      this.setData({ isRefreshing: false });
+      wx.showToast({ title: '刷新成功', icon: 'success' });
+    }).catch(() => {
+      this.setData({ isRefreshing: false });
+      wx.showToast({ title: '刷新失败', icon: 'none' });
+    });
+  },
 
+  // 更新价格
+  updatePrice(e) {
+    const { id } = e.currentTarget.dataset;
+    const newPrice = e.detail.value;
+    
     const updatedRides = this.data.myPublishedRides.map(ride => {
-      if (ride._id === rideId) {
+      if (ride._id === id) {
         return { ...ride, price: newPrice };
       }
       return ride;
@@ -97,19 +116,48 @@ Page({
     this.setData({ myPublishedRides: updatedRides });
   },
 
-  // **更新空余座位**
+  // 更新空位
   updateSeats(e) {
-    const rideId = e.currentTarget.dataset.id;
+    const { id } = e.currentTarget.dataset;
     const newSeats = e.detail.value;
-
+    
     const updatedRides = this.data.myPublishedRides.map(ride => {
-      if (ride._id === rideId) {
+      if (ride._id === id) {
         return { ...ride, empty_seats: newSeats };
       }
       return ride;
     });
 
     this.setData({ myPublishedRides: updatedRides });
+  },
+
+  // 保存修改
+  saveUpdates(e) {
+    const { id } = e.currentTarget.dataset;
+    const ride = this.data.myPublishedRides.find(r => r._id === id);
+    
+    if (!ride) return;
+
+    const db = wx.cloud.database();
+    db.collection('rides').doc(id).update({
+      data: {
+        price: parseFloat(ride.price) || 0,
+        empty_seats: parseInt(ride.empty_seats) || 0
+      }
+    }).then(() => {
+      wx.showToast({ 
+        title: '更新成功', 
+        icon: 'success' 
+      });
+      // 重新加载数据以确保显示最新状态
+      this.loadMyPublished();
+    }).catch(err => {
+      console.error('更新失败:', err);
+      wx.showToast({ 
+        title: '更新失败', 
+        icon: 'none' 
+      });
+    });
   },
 
   // tab 切换
@@ -125,39 +173,67 @@ Page({
 
   deletePublishedRide(e) {
     const rideId = e.currentTarget.dataset.id;
-    db.collection("rides").doc(rideId).remove().then(() => {
-      wx.showToast({ title: "删除成功", icon: "success" });
-      this.loadMyPublished();
-    }).catch(err => {
-      console.error("删除失败:", err);
-      wx.showToast({ title: "删除失败", icon: "none" });
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除这条信息吗？',
+      success: (res) => {
+        if (res.confirm) {
+          const db = wx.cloud.database();
+          db.collection('rides').doc(rideId).remove()
+            .then(() => {
+              wx.showToast({ 
+                title: '删除成功', 
+                icon: 'success' 
+              });
+              // 重新加载列表
+              this.loadMyPublished();
+            })
+            .catch(err => {
+              console.error('删除失败:', err);
+              wx.showToast({ 
+                title: '删除失败', 
+                icon: 'none' 
+              });
+            });
+        }
+      }
     });
   },
 
   editPublishedRequest(e) {
     const requestId = e.currentTarget.dataset.id;
-    wx.navigateTo({ url: `/pages/editRequest/editRequest?id=${requestId}` });
+    wx.navigateTo({
+      url: `/pages/publish/publish?type=request&id=${requestId}&mode=edit`
+    });
   },
 
-
-  // **保存修改到数据库**
-  saveUpdates(e) {
-    const rideId = e.currentTarget.dataset.id;
-    const updatedRide = this.data.myPublishedRides.find(ride => ride._id === rideId);
-    
-    if (!updatedRide) return;
-
-    db.collection("rides").doc(rideId).update({
-      data: {
-        price: parseFloat(updatedRide.price) || 0,
-        empty_seats: parseInt(updatedRide.empty_seats) || 0
+  // 删除已发布的 request
+  deletePublishedRequest(e) {
+    const requestId = e.currentTarget.dataset.id;
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除这条信息吗？',
+      success: (res) => {
+        if (res.confirm) {
+          const db = wx.cloud.database();
+          db.collection('rideRequest').doc(requestId).remove()
+            .then(() => {
+              wx.showToast({ 
+                title: '删除成功', 
+                icon: 'success' 
+              });
+              // 重新加载列表
+              this.loadMyPublished();
+            })
+            .catch(err => {
+              console.error('删除失败:', err);
+              wx.showToast({ 
+                title: '删除失败', 
+                icon: 'none' 
+              });
+            });
+        }
       }
-    }).then(() => {
-      wx.showToast({ title: "更新成功", icon: "success" });
-      this.loadMyPublished(); // Reload data
-    }).catch(err => {
-      console.error("更新失败:", err);
-      wx.showToast({ title: "更新失败", icon: "none" });
     });
   },
 
@@ -230,22 +306,71 @@ Page({
     });
   },
 
-  deletePublishedRequest(e) {
-    const requestId = e.currentTarget.dataset.id;
-    db.collection("rideRequest").doc(requestId).remove().then(() => {
-      wx.showToast({ title: "删除成功", icon: "success" });
-      this.loadMyPublished();
-    }).catch(err => {
-      console.error("删除失败:", err);
-      wx.showToast({ title: "删除失败", icon: "none" });
-    });
-  },
-
   // Add a method to navigate to the detail page
   navigateToDetail(e) {
     const { id, type } = e.currentTarget.dataset;
     wx.navigateTo({
       url: `/pages/detail/detail?type=${type}&id=${id}`
+    });
+  },
+
+  // 编辑已发布的 ride
+  editPublishedRide(e) {
+    const rideId = e.currentTarget.dataset.id;
+    wx.navigateTo({
+      url: `/pages/publish/publish?type=rides&id=${rideId}&mode=edit`
+    });
+  },
+
+  // 加载用户乘车记录
+  loadRidesAsPassenger() {
+    const userOpenid = wx.getStorageSync("openid");
+    const db = wx.cloud.database();
+    
+    db.collection("users").where({
+      _openid: userOpenid
+    }).get().then(res => {
+      if (res.data && res.data.length > 0) {
+        const user = res.data[0];
+        const passengerRides = user.as_passenger || [];
+        
+        // 获取所有乘车记录的详细信息
+        if (passengerRides.length > 0) {
+          db.collection("rides").where({
+            _id: db.command.in(passengerRides)
+          }).get().then(ridesRes => {
+            this.setData({
+              ridesAsPassenger: ridesRes.data
+            });
+          });
+        }
+      }
+    });
+  },
+
+  // 加载用户接单记录
+  loadRidesAsDriver() {
+    const userOpenid = wx.getStorageSync("openid");
+    const db = wx.cloud.database();
+    
+    db.collection("users").where({
+      _openid: userOpenid
+    }).get().then(res => {
+      if (res.data && res.data.length > 0) {
+        const user = res.data[0];
+        const driverRides = user.as_driver || [];
+        
+        // 获取所有接单记录的详细信息
+        if (driverRides.length > 0) {
+          db.collection("rides").where({
+            _id: db.command.in(driverRides)
+          }).get().then(ridesRes => {
+            this.setData({
+              ridesAsDriver: ridesRes.data
+            });
+          });
+        }
+      }
     });
   }
 });

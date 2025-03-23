@@ -1,57 +1,31 @@
 .container {
   padding: 20rpx;
-  background-color: #f8f8f8;
+  background-color: #f7f7f7;
 }
 
 .chat-item {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10rpx;
+  background: #fff;
   padding: 20rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
+  margin-bottom: 10rpx;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 5rpx rgba(0,0,0,0.1);
 }
 
-.chat-title {
-  font-size: 32rpx;
-  font-weight: bold;
+.chat-header {
+  display: flex;
+  justify-content: space-between;
   margin-bottom: 10rpx;
 }
 
-.chat-preview {
+.unread {
+  background: red;
+  color: #fff;
+  padding: 0 10rpx;
+  border-radius: 12rpx;
   font-size: 28rpx;
-  color: #666;
-}
-
-.page-title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-.chat-info {
-  flex-grow: 1;
-}
-
-.chat-name {
-  font-weight: bold;
-  font-size: 16px;
 }
 
 .last-message {
-  font-size: 14px;
-  color: gray;
-  margin-top: 4px;
-}
-
-.chat-time {
-  font-size: 12px;
-  color: gray;
+  font-size: 28rpx;
+  color: #333;
 }

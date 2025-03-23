@@ -1,10 +1,11 @@
 <view class="container">
-  <text class="page-title">消息</text>
-
-  <block wx:for="{{chatItems}}" wx:key="{{item.id}}">
-    <view class="chat-item" bindtap="navigateToChat" data-ride-id="{{item.rideId}}">
-      <text class="chat-title">{{item.title}}</text>
-      <text class="chat-preview">{{item.lastMessage}}</text>
+  <block wx:for="{{chatItems}}" wx:key="{{item._id}}">
+    <view class="chat-item" data-id="{{item._id}}" data-rideid="{{item.ride_id}}" bindtap="openChat">
+      <view class="chat-header">
+        <text class="sender">From: {{item.sender_openid}}</text>
+        <text wx:if="{{item.unread_count > 0}}" class="unread">{{item.unread_count}}</text>
+      </view>
+      <view class="last-message">{{item.last_message}}</view>
     </view>
   </block>
 </view>

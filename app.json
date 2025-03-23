@@ -40,12 +40,6 @@
         "selectedIconPath": "images/icons/plus.png"
       },
       {
-        "pagePath": "pages/messages/messages",
-        "text": "消息",
-        "iconPath": "images/icons/goods.png",
-        "selectedIconPath": "images/icons/goods-active.png"
-      },
-      {
         "pagePath": "pages/myinfo/myinfo",
         "text": "我的",
         "iconPath": "images/icons/usercenter.png",
