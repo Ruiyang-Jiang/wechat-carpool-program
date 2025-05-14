@@ -5,8 +5,6 @@
     "pages/logs/logs",
     "pages/list/list",
     "pages/myinfo/myinfo",
-    "pages/chat/chat",
-    "pages/messages/messages",
     "pages/publish/publish",
     "pages/detail/detail"
   ],
@@ -16,7 +14,7 @@
     "navigationBarBackgroundColor": "#00AA00",
     "enablePullDownRefresh": true,
     "backgroundColor": "#efefef",
-    "backgroundTextStyle":"dark",
+    "backgroundTextStyle": "dark",
     "onReachBottomDistance": 100
   },
   "tabBar": {
@@ -54,6 +52,10 @@
   "permission": {
     "scope.userInfo": {
       "desc": "获取您的用户信息以提供更好的体验"
+    },
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于小程序位置接口的效果展示"
     }
-  }
+  },
+  "plugins": {}
 }

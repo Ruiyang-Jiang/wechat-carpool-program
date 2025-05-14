@@ -7,7 +7,8 @@ Page({
     detail: null,    // 具体数据
     publisherInfo: null, // 发布者的信息
     userOpenid: "",  // 当前用户 openid
-    isLoading: true  // 加载状态
+    isLoading: true,  // 加载状态
+    adUnitId: 'your-ad-unit-id-here', // 替换为你的广告单元ID
   },
 
   onLoad(options) {
@@ -102,9 +103,12 @@ Page({
       .then(res => {
         console.log("Publisher data loaded:", res.data);
         if (res.data && res.data.length > 0) {
-          this.setData({ 
-            publisherInfo: res.data[0]
-          });
+          const publisherInfo = res.data[0];
+          // 如果发布信息中有微信号，优先使用发布信息中的微信号
+          if (this.data.detail.contact_wechat) {
+            publisherInfo.wechat = this.data.detail.contact_wechat;
+          }
+          this.setData({ publisherInfo });
         }
       })
       .catch(err => {
@@ -121,13 +125,21 @@ Page({
       return;
     }
 
-    wx.setClipboardData({
-      data: this.data.publisherInfo.wechat,
-      success: () => {
-        wx.showToast({ 
-          title: '微信号已复制',
-          icon: 'success'
-        });
+    wx.showModal({
+      title: '获取微信号',
+      content: '确定要获取发布者的微信号吗？',
+      success: (res) => {
+        if (res.confirm) {
+          wx.setClipboardData({
+            data: this.data.publisherInfo.wechat,
+            success: () => {
+              wx.showToast({
+                title: '微信号已复制',
+                icon: 'success'
+              });
+            }
+          });
+        }
       }
     });
   },

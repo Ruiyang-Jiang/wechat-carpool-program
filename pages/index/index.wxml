@@ -1,23 +1,130 @@
 <view class="container">
-  <!-- 搜索顺风车(车找人) -->
-  <view class="search-block">
-    <text class="title">搜索车找人</text>
-    <input placeholder="出发地" data-field="searchDeparture" bindinput="onInputChange" />
-    <input placeholder="目的地" data-field="searchDestination" bindinput="onInputChange" />
-    <picker mode="date" bindchange="onSearchDateChange">
-      <view>{{searchDate ? searchDate : '请选择日期'}}</view>
-    </picker>
-    <button bindtap="searchRides">搜索</button>
+
+  <!-- 顶部 segmented tab -->
+  <view class="segmented">
+    <view class="seg-btn {{activeTab === 'rides' ? 'active' : ''}}"
+          data-tab="rides"
+          bindtap="switchTab">
+      车找人
+    </view>
+    <view class="seg-btn {{activeTab === 'requests' ? 'active' : ''}}"
+          data-tab="requests"
+          bindtap="switchTab">
+      人找车
+    </view>
   </view>
 
-  <!-- 搜索人找车(人找司机) -->
-  <view class="search-block">
-    <text class="title">搜索人找车</text>
-    <input placeholder="出发地" data-field="search2Departure" bindinput="onInputChange" />
-    <input placeholder="目的地" data-field="search2Destination" bindinput="onInputChange" />
-    <picker mode="date" bindchange="onSearch2DateChange">
-      <view>{{search2Date ? search2Date : '请选择日期'}}</view>
+  <!-- ================= 车找人表单 ================= -->
+  <view wx:if="{{activeTab === 'rides'}}" class="search-card">
+
+    <!-- 出发地 -->
+    <view class="input-group">
+      <image src="/images/icons/start.png" class="icon"/>
+      <input placeholder="出发城市 (如 Ithaca, NY)"
+             value="{{departure_place.city}}"
+             bindinput="onDepartureInput"/>
+    </view>
+    <!-- 联想列表 -->
+    <view class="suggest-list" wx:if="{{departureSuggestions.length}}">
+      <view class="suggest-container">
+        <view class="suggest-item" 
+              wx:for="{{departureSuggestions}}" 
+              wx:key="index"
+              bindtap="chooseDeparture"
+              data-item="{{item}}">
+          <text>{{item.city}}, {{item.state}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 目的地 -->
+    <view class="input-group">
+      <image src="/images/icons/dest.png" class="icon"/>
+      <input placeholder="目的地 (如 New York, NY)"
+             value="{{arrival_place.city}}"
+             bindinput="onArrivalInput"/>
+    </view>
+    <view class="suggest-list" wx:if="{{arrivalSuggestions.length}}">
+      <view class="suggest-container">
+        <view class="suggest-item" 
+              wx:for="{{arrivalSuggestions}}" 
+              wx:key="index"
+              bindtap="chooseArrival"
+              data-item="{{item}}">
+          <text>{{item.city}}, {{item.state}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 日期 -->
+    <picker mode="date"
+            start="{{todayString}}"
+            end="2030-12-31"
+            value="{{searchDate}}"
+            bindchange="onSearchDateChange">
+      <view class="date-btn">
+        {{searchDate || '请选择日期'}}
+      </view>
     </picker>
-    <button bindtap="searchPeople">搜索</button>
+
+    <!-- 搜索按钮 -->
+    <button class="primary-btn" bindtap="searchRides">搜索</button>
   </view>
+
+  <!-- ================= 人找车表单 ================= -->
+  <view wx:if="{{activeTab === 'requests'}}" class="search-card">
+
+    <!-- 出发地 -->
+    <view class="input-group">
+      <image src="/images/icons/start.png" class="icon"/>
+      <input placeholder="出发城市"
+             value="{{search2Departure.city}}"
+             bindinput="onDeparture2Input"/>
+    </view>
+    <view class="suggest-list" wx:if="{{departure2Suggestions.length}}">
+      <view class="suggest-container">
+        <view class="suggest-item" 
+              wx:for="{{departure2Suggestions}}" 
+              wx:key="index"
+              bindtap="chooseDeparture2"
+              data-item="{{item}}">
+          <text>{{item.city}}, {{item.state}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 目的地 -->
+    <view class="input-group">
+      <image src="/images/icons/dest.png" class="icon"/>
+      <input placeholder="目的地"
+             value="{{search2Destination.city}}"
+             bindinput="onDestination2Input"/>
+    </view>
+    <view class="suggest-list" wx:if="{{destination2Suggestions.length}}">
+      <view class="suggest-container">
+        <view class="suggest-item" 
+              wx:for="{{destination2Suggestions}}" 
+              wx:key="index"
+              bindtap="chooseDestination2"
+              data-item="{{item}}">
+          <text>{{item.city}}, {{item.state}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 日期 -->
+    <picker mode="date"
+            start="{{todayString}}"
+            end="2030-12-31"
+            value="{{search2Date}}"
+            bindchange="onSearch2DateChange">
+      <view class="date-btn">
+        {{search2Date || '请选择日期'}}
+      </view>
+    </picker>
+
+    <!-- 搜索按钮 -->
+    <button class="primary-btn" bindtap="searchPeople">搜索</button>
+  </view>
+
 </view>

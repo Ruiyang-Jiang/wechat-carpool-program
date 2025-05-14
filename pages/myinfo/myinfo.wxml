@@ -7,29 +7,28 @@
     <view class="tab-item {{currentTab === 'passenger' ? 'active' : ''}}" 
           bindtap="switchToPassenger">我乘坐的</view>
     <view class="tab-item {{currentTab === 'driver' ? 'active' : ''}}" 
-          bindtap="switchToDriver">我接单的</view>
+          bindtap="switchToDriver">我驾驶的</view>
     <view class="tab-item {{currentTab === 'mine' ? 'active' : ''}}" 
           bindtap="switchToMine">我发布的</view>
   </view>
 
   <!-- 我乘坐的 rides -->
   <view wx:if="{{currentTab === 'passenger'}}">
-    <block wx:for="{{ridesAsPassenger}}" wx:key="{{item._id}}">
+    <block wx:for="{{ridesAsPassenger}}" wx:key="_id">
       <view class="ride-item">
         <view class="ride-header">
-          <text class="date">{{item.departure_date}}</text>
-          <text class="time">{{item.departure_time}}</text>
+          <text class="date">{{item.departure_date}} {{item.departure_time}}</text>
         </view>
         
         <view class="ride-content">
           <view class="location-info">
             <view class="departure">
               <text class="icon">起</text>
-              <text>{{item.departure_place}}</text>
+              <text>{{item.departure_place.city}}</text>
             </view>
             <view class="arrival">
               <text class="icon">终</text>
-              <text>{{item.arrival_place}}</text>
+              <text>{{item.arrival_place.city}}</text>
             </view>
           </view>
           
@@ -42,24 +41,23 @@
     </block>
   </view>
 
-  <!-- 我接单的 rides -->
+  <!-- 我驾驶的 rides -->
   <view wx:if="{{currentTab === 'driver'}}">
-    <block wx:for="{{ridesAsDriver}}" wx:key="{{item._id}}">
+    <block wx:for="{{ridesAsDriver}}" wx:key="_id">
       <view class="ride-item">
         <view class="ride-header">
-          <text class="date">{{item.departure_date}}</text>
-          <text class="time">{{item.departure_time}}</text>
+          <text class="date">{{item.departure_date}} {{item.departure_time}}</text>
         </view>
         
         <view class="ride-content">
           <view class="location-info">
             <view class="departure">
               <text class="icon">起</text>
-              <text>{{item.departure_place}}</text>
+              <text>{{item.departure_place.city}}</text>
             </view>
             <view class="arrival">
               <text class="icon">终</text>
-              <text>{{item.arrival_place}}</text>
+              <text>{{item.arrival_place.city}}</text>
             </view>
           </view>
           
@@ -74,28 +72,27 @@
 
   <!-- 我发布的 (rides + rideRequest) -->
   <view wx:if="{{currentTab === 'mine'}}">
-    <text class="section-title">我发布的车找人(rides)：</text>
-    <block wx:for="{{myPublishedRides}}" wx:key="{{item._id}}">
+    <text class="section-title">我发布的找乘客：</text>
+    <block wx:for="{{myPublishedRides}}" wx:key="_id">
       <view class="ride-item">
         <view class="ride-header">
-          <text class="date">{{item.departure_date}}</text>
-          <text class="time">{{item.departure_time}}</text>
+          <text class="date">{{item.departure_date}} {{item.departure_time}}</text>
         </view>
         
         <view class="ride-content">
           <view class="location-info">
             <view class="departure">
               <text class="icon">起</text>
-              <text>{{item.departure_place}}</text>
+              <text>{{item.departure_place.city}}</text>
             </view>
             <view class="arrival">
               <text class="icon">终</text>
-              <text>{{item.arrival_place}}</text>
+              <text>{{item.arrival_place.city}}</text>
             </view>
           </view>
           
           <view class="ride-details">
-            <text class="price">¥{{item.price}}</text>
+            <text class="price">${{item.price}}/person</text>
             <text class="seats">空位: {{item.empty_seats}}</text>
           </view>
 
@@ -130,35 +127,56 @@
       </view>
     </block>
 
-    <text class="section-title">我发布的人找车(rideRequest)：</text>
-    <block wx:for="{{myPublishedRequests}}" wx:key="{{item._id}}">
+    <text class="section-title">我发布的找司机：</text>
+    <block wx:for="{{myPublishedRequests}}" wx:key="_id">
       <view class="ride-item">
         <view class="ride-header">
-          <text class="date">{{item.departure_date}}</text>
-          <text class="time">{{item.departure_time}}</text>
+          <text class="date">{{item.departure_date}} {{item.departure_time}}</text>
         </view>
         
         <view class="ride-content">
           <view class="location-info">
             <view class="departure">
               <text class="icon">起</text>
-              <text>{{item.departure_place}}</text>
+              <text>{{item.departure_place.city}}</text>
             </view>
             <view class="arrival">
               <text class="icon">终</text>
-              <text>{{item.arrival_place}}</text>
+              <text>{{item.arrival_place.city}}</text>
             </view>
           </view>
           
           <view class="ride-details">
-            <text class="price">¥{{item.price}}</text>
+            <text class="price">${{item.price}}/person</text>
             <text class="seats">人数: {{item.passenger_number}}</text>
           </view>
 
-          <!-- 操作按钮 -->
+          <!-- 可编辑的价格和空位 -->
+          <view class="edit-section">
+            <view class="edit-item">
+              <text class="label">价格:</text>
+              <input type="digit" value="{{item.price}}" 
+                     data-id="{{item._id}}" 
+                     bindinput="updateRequestPrice"
+                     class="edit-input"/>
+            </view>
+            <view class="edit-item">
+              <text class="label">人数:</text>
+              <input type="number" value="{{item.passenger_number}}" 
+                     data-id="{{item._id}}" 
+                     bindinput="updatePassengerNumber"
+                     class="edit-input"/>
+            </view>
+          </view>
+
+          <!-- 保存和删除按钮 -->
           <view class="action-section">
-            <button class="action-btn edit-btn" bindtap="editPublishedRequest" data-id="{{item._id}}">修改</button>
-            <button class="action-btn delete-btn" bindtap="deletePublishedRequest" data-id="{{item._id}}">删除</button>
+            <button class="action-btn save-btn" 
+                    bindtap="saveRequestUpdates" 
+                    data-id="{{item._id}}">保存修改</button>
+            <button class="action-btn delete-btn" 
+                    bindtap="deletePublishedRequest" 
+                    data-id="{{item._id}}">删除</button>
           </view>
         </view>
       </view>

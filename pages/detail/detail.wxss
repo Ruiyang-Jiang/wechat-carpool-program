@@ -91,11 +91,13 @@
 }
 
 .copy-btn {
+  margin: 0;
   padding: 10rpx 30rpx;
-  background: var(--primary-color);
+  font-size: 26rpx;
+  background: #07c160;  /* 微信绿色 */
   color: white;
   border-radius: 30rpx;
-  font-size: 26rpx;
+  min-width: 160rpx;
 }
 
 .action-section {
@@ -141,4 +143,21 @@
   text-align: center;
   padding: 40rpx;
   color: #999;
+}
+
+.wechat-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20rpx 0;
+}
+
+.copy-btn:active {
+  opacity: 0.8;
+}
+
+/* 隐藏的微信号样式 */
+.info text.hidden {
+  font-family: monospace;
+  letter-spacing: 2rpx;
 }

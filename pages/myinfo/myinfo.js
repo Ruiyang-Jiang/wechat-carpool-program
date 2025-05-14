@@ -1,6 +1,16 @@
 // pages/myinfo/myinfo.js
 const db = wx.cloud.database();
 
+// ① 工具：把数组按 departure_date + departure_time 做倒序
+function sortByDateDesc(arr) {
+  return arr.sort((a, b) => {
+    // 兼容没有 departure_time 的情况，默认为 00:00
+    const tA = new Date(`${a.departure_date} ${a.departure_time || '00:00'}`).getTime();
+    const tB = new Date(`${b.departure_date} ${b.departure_time || '00:00'}`).getTime();
+    return tB - tA;   // 新的在前
+  });
+}
+
 Page({
   data: {
     userInfo: {},
@@ -49,7 +59,7 @@ Page({
         .where({ _id: db.command.in(userInfo.as_passenger) })
         .get()
         .then(res => {
-          this.setData({ ridesAsPassenger: res.data });
+          this.setData({ ridesAsPassenger: sortByDateDesc(res.data) });
         })
         .catch(err => console.error("获取乘坐信息失败:", err));
     }
@@ -59,7 +69,7 @@ Page({
         .where({ _id: db.command.in(userInfo.as_driver) })
         .get()
         .then(res => {
-          this.setData({ ridesAsDriver: res.data });
+          this.setData({ ridesAsDriver: sortByDateDesc(res.data) });
         })
         .catch(err => console.error("获取接单信息失败:", err));
     }
@@ -72,14 +82,14 @@ Page({
     db.collection("rides").where({
       publisher_id: openid
     }).get().then(res => {
-      this.setData({ myPublishedRides: res.data });
+      this.setData({ myPublishedRides: sortByDateDesc(res.data) });
     }).catch(err => console.error("加载我发布的 rides 失败:", err));
 
     // 我发布的 rideRequest
     db.collection("rideRequest").where({
       publisher_id: openid
     }).get().then(res => {
-      this.setData({ myPublishedRequests: res.data });
+      this.setData({ myPublishedRequests: sortByDateDesc(res.data) });
     }).catch(err => console.error("加载我发布的 rideRequest 失败:", err));
   },
 
@@ -340,7 +350,7 @@ Page({
             _id: db.command.in(passengerRides)
           }).get().then(ridesRes => {
             this.setData({
-              ridesAsPassenger: ridesRes.data
+              ridesAsPassenger: sortByDateDesc(ridesRes.data)
             });
           });
         }
@@ -366,7 +376,7 @@ Page({
             _id: db.command.in(driverRides)
           }).get().then(ridesRes => {
             this.setData({
-              ridesAsDriver: ridesRes.data
+              ridesAsDriver: sortByDateDesc(ridesRes.data)
             });
           });
         }

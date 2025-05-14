@@ -1,123 +1,150 @@
 <view class="container">
-  <!-- TAB切换 -->
+  <!-- 发布类型切换 -->
   <view class="subtab-container">
-    <button
-      class="subtab-btn {{currentSubTab === 'passenger' ? 'active' : ''}}"
-      data-tab="passenger"
-      bindtap="onSubTabChange"
-    >
-      我要找车
-    </button>
-    <button
-      class="subtab-btn {{currentSubTab === 'driver' ? 'active' : ''}}"
-      data-tab="driver"
-      bindtap="onSubTabChange"
-    >
-      我要发车
-    </button>
+    <view class="subtab-btn {{currentSubTab === 'passenger' ? 'active' : ''}}" 
+          bindtap="onSubTabChange" data-tab="passenger">我要找车</view>
+    <view class="subtab-btn {{currentSubTab === 'driver' ? 'active' : ''}}" 
+          bindtap="onSubTabChange" data-tab="driver">我要找人</view>
   </view>
 
-  <!-- 表单区域 -->
-  <view class="form-item">
-    <text class="label">出发地</text>
-    <input 
-      class="input"
-      placeholder="请输入出发地"
-      data-field="departure_place"
-      bindinput="onInputChange"
-      value="{{departure_place}}"
-    />
-  </view>
-
-  <view class="form-item">
-    <text class="label">目的地</text>
-    <input 
-      class="input"
-      placeholder="请输入目的地"
-      data-field="arrival_place"
-      bindinput="onInputChange"
-      value="{{arrival_place}}"
-    />
-  </view>
-
-  <view class="form-item">
-    <text class="label">出发日期</text>
-    <picker 
-      mode="date" 
-      start="{{todayString}}" 
-      end="2030-12-31" 
-      value="{{departure_date}}" 
-      bindchange="onDepartDateChange"
-    >
-      <view class="picker-view">
-        {{departure_date ? departure_date : '请选择'}}
+  <view class="form-group">
+    <!-- 出发地输入框和联想列表 -->
+    <view class="form-item">
+      <text class="label">出发地</text>
+      <view class="input-wrapper">
+        <input class="input" 
+               placeholder="Enter city name (e.g., Ithaca, NY)" 
+               value="{{departure_place.city}}"
+               bindinput="onDepartureInput"/>
+        <!-- 联想列表 -->
+        <view class="suggest-list" wx:if="{{departureSuggestions.length > 0}}">
+          <view class="suggest-container">
+            <view class="suggest-item" 
+                  wx:for="{{departureSuggestions}}" 
+                  wx:key="index"
+                  bindtap="chooseDeparture"
+                  data-item="{{item}}">
+              <text>{{item.city}}, {{item.state}}</text>
+            </view>
+          </view>
+        </view>
       </view>
-    </picker>
-  </view>
+    </view>
 
-  <view class="form-item">
-    <text class="label">出发时间</text>
-    <picker 
-      mode="time" 
-      start="{{currentTime}}" 
-      value="{{departure_time}}"
-      bindchange="onDepartTimeChange"
-    >
-      <view class="picker-view">
-        {{departure_time ? departure_time : '请选择'}}
+    <!-- 目的地输入框和联想列表 -->
+    <view class="form-item">
+      <text class="label">目的地</text>
+      <view class="input-wrapper">
+        <input class="input" 
+               placeholder="Enter city name (e.g., New York City, NY)" 
+               value="{{arrival_place.city}}"
+               bindinput="onArrivalInput"/>
+        <!-- 联想列表 -->
+        <view class="suggest-list" wx:if="{{arrivalSuggestions.length > 0}}">
+          <view class="suggest-container">
+            <view class="suggest-item" 
+                  wx:for="{{arrivalSuggestions}}" 
+                  wx:key="index"
+                  bindtap="chooseArrival"
+                  data-item="{{item}}">
+              <text>{{item.city}}, {{item.state}}</text>
+            </view>
+          </view>
+        </view>
       </view>
-    </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="label">出发日期</text>
+      <picker 
+        mode="date" 
+        start="{{todayString}}" 
+        end="2030-12-31" 
+        value="{{departure_date}}" 
+        bindchange="onDepartDateChange"
+      >
+        <view class="picker-view">
+          {{departure_date ? departure_date : '请选择'}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="label">出发时间</text>
+      <picker 
+        mode="time" 
+        start="{{currentTime}}" 
+        value="{{departure_time}}"
+        bindchange="onDepartTimeChange"
+      >
+        <view class="picker-view">
+          {{departure_time ? departure_time : '请选择'}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="label">价格($/person)</text>
+      <input 
+        class="input"
+        type="digit"
+        placeholder="请输入价格"
+        data-field="price"
+        bindinput="onInputChange"
+        value="{{price}}"
+      />
+    </view>
+
+    <!-- 仅当 currentSubTab = passenger 时，显示"乘客人数" -->
+    <view wx:if="{{currentSubTab === 'passenger'}}" class="form-item">
+      <text class="label">乘客人数</text>
+      <input 
+        class="input"
+        type="number"
+        placeholder="1"
+        data-field="passenger_number"
+        bindinput="onInputChange"
+        value="{{passenger_number}}"
+      />
+    </view>
+
+    <!-- 仅当 currentSubTab = driver 时，显示"空余座位" -->
+    <view wx:if="{{currentSubTab === 'driver'}}" class="form-item">
+      <text class="label">空余座位</text>
+      <input 
+        class="input"
+        type="number"
+        placeholder="3"
+        data-field="empty_seats"
+        bindinput="onInputChange"
+        value="{{empty_seats}}"
+      />
+    </view>
+
+    <view wx:if="{{currentSubTab === 'driver'}}" class="form-item">
+      <text class="label">汽车型号（选填）</text>
+      <input 
+        class="input"
+        type="text"
+        placeholder="请输入汽车型号"
+        data-field="car_model"
+        bindinput="onInputChange"
+        value="{{car_model}}"
+      />
+    </view>
+
+    <!-- 添加联系方式部分 -->
+    <view class="form-item">
+      <text class="label">微信号 *</text>
+      <view class="input-wrapper">
+        <input class="input" 
+               placeholder="请输入您的微信号" 
+               value="{{contact_wechat}}"
+               data-field="contact_wechat"
+               bindinput="onInputChange"/>
+      </view>
+    </view>
+
+    <button class="submit-btn" bindtap="submitRide">发布</button>
   </view>
-
-  <view class="form-item">
-    <text class="label">价格($)</text>
-    <input 
-      class="input"
-      type="digit"
-      placeholder="请输入价格"
-      data-field="price"
-      bindinput="onInputChange"
-      value="{{price}}"
-    />
-  </view>
-
-  <!-- 仅当 currentSubTab = passenger 时，显示“乘客人数” -->
-  <view wx:if="{{currentSubTab === 'passenger'}}" class="form-item">
-    <text class="label">乘客人数</text>
-    <input 
-      class="input"
-      type="number"
-      placeholder="1"
-      data-field="passenger_number"
-      bindinput="onInputChange"
-      value="{{passenger_number}}"
-    />
-  </view>
-
-  <!-- 仅当 currentSubTab = driver 时，显示“空余座位” -->
-  <view wx:if="{{currentSubTab === 'driver'}}" class="form-item">
-    <text class="label">空余座位</text>
-    <input 
-      class="input"
-      type="number"
-      placeholder="3"
-      data-field="empty_seats"
-      bindinput="onInputChange"
-      value="{{empty_seats}}"
-    />
-  </view>
-
-  <view wx:if="{{currentSubTab === 'driver'}}" class="form-item">
-  <text class="label">汽车型号🚗（选填）</text>
-  <input 
-    class="input"
-    type="text"
-    placeholder="请输入汽车型号"
-    data-field="car_model"
-    bindinput="onInputChange"
-    value="{{car_model}}"
-  />
-</view>
-
-  <button class="submit-btn" bindtap="submitRide">发布</button>
 </view>

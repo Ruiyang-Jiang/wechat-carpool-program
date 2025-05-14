@@ -1,0 +1,50 @@
+/* ===== 顶部标题 ===== */
+.header { text-align: center; margin-bottom: 20rpx; }
+.title  { font-size: 36rpx; font-weight: 600; }
+
+/* ===== 卡片 ===== */
+.ride-card {
+  padding: 30rpx 20rpx;   /* 保持和全局 .card 统一 */
+  position: relative;     /* 便于放置右侧按钮 */
+}
+
+/* 右侧"联系"按钮（继承 .primary-btn 基础样式） */
+.primary-btn.mini {
+  position: absolute;
+  right: 30rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0 32rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  font-size: 26rpx;
+}
+
+/* ===== 信息排版 ===== */
+.info-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 12rpx 0;
+}
+
+.info-row.major .value {
+  font-size: 32rpx;
+  font-weight: 500;
+}
+
+.arrow {
+  margin: 0 12rpx;
+  color: var(--primary-color);
+}
+
+.label { color: var(--text-secondary); margin-right: 8rpx; }
+.value { color: var(--text-color); margin-right: 24rpx; }
+.price { color: var(--danger-color); font-weight: 500; }
+
+/* ===== 无结果提示 ===== */
+.no-results {
+  margin-top: 120rpx;
+  text-align: center;
+  color: var(--text-light);
+} 

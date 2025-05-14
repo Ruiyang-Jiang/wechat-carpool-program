@@ -53,10 +53,10 @@
       <view wx:if="{{passengerData.length === 0}}" class="no-data">
         <text>未找到符合条件的乘客</text>
       </view>
-      <block wx:for="{{passengerData}}" wx:key="{{item._id}}">
+      <block wx:for="{{passengerData}}" wx:key="_id">
         <view class="ride-item">
-          <view><text class="label">出发地：</text>{{item.departure_place}}</view>
-          <view><text class="label">目的地：</text>{{item.arrival_place}}</view>
+          <view><text class="label">出发地：</text>{{item.departure_place.city}}, {{item.departure_place.state}}</view>
+          <view><text class="label">目的地：</text>{{item.arrival_place.city}}, {{item.arrival_place.state}}</view>
           <view><text class="label">出发时间：</text>{{item.departure_date}} {{item.departure_time || '未知'}}</view>
           <view><text class="label">空余座位：</text>{{item.empty_seats}}</view>
           <view><text class="label">价格：</text>¥{{item.price}}</view>
@@ -109,10 +109,10 @@
       <view wx:if="{{driverData.length === 0}}" class="no-data">
         <text>未找到符合条件的司机</text>
       </view>
-      <block wx:for="{{driverData}}" wx:key="{{item._id}}">
+      <block wx:for="{{driverData}}" wx:key="_id">
         <view class="request-item">
-          <view><text class="label">出发地：</text>{{item.departure_place}}</view>
-          <view><text class="label">目的地：</text>{{item.arrival_place}}</view>
+          <view><text class="label">出发地：</text>{{item.departure_place.city}}, {{item.departure_place.state}}</view>
+          <view><text class="label">目的地：</text>{{item.arrival_place.city}}, {{item.arrival_place.state}}</view>
           <view><text class="label">出发时间：</text>{{item.departure_date}} {{item.departure_time || '未知'}}</view>
           <view><text class="label">期望价格：</text>¥{{item.price}}</view>
           <view><text class="label">出发人数：</text>{{item.passenger_number}}</view>

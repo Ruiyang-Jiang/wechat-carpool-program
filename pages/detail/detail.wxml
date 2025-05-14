@@ -3,7 +3,12 @@
   <view class="publisher-info">
     <text class="title">发布者信息</text>
     <text class="info">姓名: {{publisherInfo.nickname || '未知'}}</text>
-    <text class="info">微信: {{publisherInfo.wechat || '未提供'}}</text>
+    <view class="wechat-info">
+      <text class="info">微信号: ******</text>
+      <button class="copy-btn" bindtap="handleCopyWeChat">
+        点击获取微信号
+      </button>
+    </view>
     <text class="info">电话: {{publisherInfo.phone || '未提供'}}</text>
   </view>
 
@@ -12,11 +17,11 @@
     <text class="title">顺风车详情</text>
     <view class="detail-row">
       <text class="label">出发地:</text>
-      <text>{{detail.departure_place}}</text>
+      <text>{{detail.departure_place.city}}, {{detail.departure_place.state}}</text>
     </view>
     <view class="detail-row">
       <text class="label">目的地:</text>
-      <text>{{detail.arrival_place}}</text>
+      <text>{{detail.arrival_place.city}}, {{detail.arrival_place.state}}</text>
     </view>
     <view class="detail-row">
       <text class="label">出发时间:</text>
