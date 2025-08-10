@@ -1,185 +1,39 @@
-<scroll-view scroll-y="true" refresher-enabled="{{true}}" 
-             refresher-triggered="{{isRefreshing}}"
-             bindrefresherrefresh="onRefresh"
-             class="scroll-container">
-  <!-- 固定在顶部的导航栏 -->
-  <view class="tab-bar">
-    <view class="tab-item {{currentTab === 'passenger' ? 'active' : ''}}" 
-          bindtap="switchToPassenger">我乘坐的</view>
-    <view class="tab-item {{currentTab === 'driver' ? 'active' : ''}}" 
-          bindtap="switchToDriver">我驾驶的</view>
-    <view class="tab-item {{currentTab === 'mine' ? 'active' : ''}}" 
-          bindtap="switchToMine">我发布的</view>
+<!-- 引入卡片模板 -->
+<import src="ride-card.wxml"/>
+
+<!-- ======= 顶部三大 Tab ======= -->
+<view class="tabs">
+  <view class="tab {{currentTab==='passenger'?'active':''}}" bindtap="switchToPassenger">乘坐记录</view>
+  <view class="tab {{currentTab==='driver'?'active':''}}"    bindtap="switchToDriver">接单记录</view>
+  <view class="tab {{currentTab==='mine'?'active':''}}"      bindtap="switchToMine">我发布</view>
+</view>
+
+<!-- ================= 乘坐记录 ================= -->
+<block wx:if="{{currentTab==='passenger'}}">
+  <view wx:if="{{ridesAsPassenger.length === 0}}" class="empty-tip">
+    暂无乘坐记录
   </view>
+  <block wx:for="{{ridesAsPassenger}}" wx:key="_id">
+    <template is="rideCard" data="{{ item: item, currentTab: currentTab }}"/>
+  </block>
+</block>
 
-  <!-- 我乘坐的 rides -->
-  <view wx:if="{{currentTab === 'passenger'}}">
-    <block wx:for="{{ridesAsPassenger}}" wx:key="_id">
-      <view class="ride-item">
-        <view class="ride-header">
-          <text class="date">{{item.departure_date}} {{item.departure_time}}</text>
-        </view>
-        
-        <view class="ride-content">
-          <view class="location-info">
-            <view class="departure">
-              <text class="icon">起</text>
-              <text>{{item.departure_place.city}}</text>
-            </view>
-            <view class="arrival">
-              <text class="icon">终</text>
-              <text>{{item.arrival_place.city}}</text>
-            </view>
-          </view>
-          
-          <view class="ride-details">
-            <text class="price">¥{{item.price}}</text>
-            <text class="seats">{{item.passengers.length}} 空位</text>
-          </view>
-        </view>
-      </view>
-    </block>
+<!-- ================= 接单记录 ================= -->
+<block wx:elif="{{currentTab==='driver'}}">
+  <view wx:if="{{ridesAsDriver.length === 0}}" class="empty-tip">
+    暂无接单记录
   </view>
+  <block wx:for="{{ridesAsDriver}}" wx:key="_id">
+    <template is="rideCard" data="{{ item: item, currentTab: currentTab }}"/>
+  </block>
+</block>
 
-  <!-- 我驾驶的 rides -->
-  <view wx:if="{{currentTab === 'driver'}}">
-    <block wx:for="{{ridesAsDriver}}" wx:key="_id">
-      <view class="ride-item">
-        <view class="ride-header">
-          <text class="date">{{item.departure_date}} {{item.departure_time}}</text>
-        </view>
-        
-        <view class="ride-content">
-          <view class="location-info">
-            <view class="departure">
-              <text class="icon">起</text>
-              <text>{{item.departure_place.city}}</text>
-            </view>
-            <view class="arrival">
-              <text class="icon">终</text>
-              <text>{{item.arrival_place.city}}</text>
-            </view>
-          </view>
-          
-          <view class="ride-details">
-            <text class="price">¥{{item.price}}</text>
-            <text class="seats">{{item.passengers.length}} 人数</text>
-          </view>
-        </view>
-      </view>
-    </block>
+<!-- ================= 我发布 ================= -->
+<block wx:else>
+  <view wx:if="{{myPublished.length === 0}}" class="empty-tip">
+    暂无发布记录
   </view>
-
-  <!-- 我发布的 (rides + rideRequest) -->
-  <view wx:if="{{currentTab === 'mine'}}">
-    <text class="section-title">我发布的找乘客：</text>
-    <block wx:for="{{myPublishedRides}}" wx:key="_id">
-      <view class="ride-item">
-        <view class="ride-header">
-          <text class="date">{{item.departure_date}} {{item.departure_time}}</text>
-        </view>
-        
-        <view class="ride-content">
-          <view class="location-info">
-            <view class="departure">
-              <text class="icon">起</text>
-              <text>{{item.departure_place.city}}</text>
-            </view>
-            <view class="arrival">
-              <text class="icon">终</text>
-              <text>{{item.arrival_place.city}}</text>
-            </view>
-          </view>
-          
-          <view class="ride-details">
-            <text class="price">${{item.price}}/person</text>
-            <text class="seats">空位: {{item.empty_seats}}</text>
-          </view>
-
-          <!-- 可编辑的价格和空位 -->
-          <view class="edit-section">
-            <view class="edit-item">
-              <text class="label">价格:</text>
-              <input type="digit" value="{{item.price}}" 
-                     data-id="{{item._id}}" 
-                     bindinput="updatePrice"
-                     class="edit-input"/>
-            </view>
-            <view class="edit-item">
-              <text class="label">空位:</text>
-              <input type="number" value="{{item.empty_seats}}" 
-                     data-id="{{item._id}}" 
-                     bindinput="updateSeats"
-                     class="edit-input"/>
-            </view>
-          </view>
-
-          <!-- 保存和删除按钮 -->
-          <view class="action-section">
-            <button class="action-btn save-btn" 
-                    bindtap="saveUpdates" 
-                    data-id="{{item._id}}">保存修改</button>
-            <button class="action-btn delete-btn" 
-                    bindtap="deletePublishedRide" 
-                    data-id="{{item._id}}">删除</button>
-          </view>
-        </view>
-      </view>
-    </block>
-
-    <text class="section-title">我发布的找司机：</text>
-    <block wx:for="{{myPublishedRequests}}" wx:key="_id">
-      <view class="ride-item">
-        <view class="ride-header">
-          <text class="date">{{item.departure_date}} {{item.departure_time}}</text>
-        </view>
-        
-        <view class="ride-content">
-          <view class="location-info">
-            <view class="departure">
-              <text class="icon">起</text>
-              <text>{{item.departure_place.city}}</text>
-            </view>
-            <view class="arrival">
-              <text class="icon">终</text>
-              <text>{{item.arrival_place.city}}</text>
-            </view>
-          </view>
-          
-          <view class="ride-details">
-            <text class="price">${{item.price}}/person</text>
-            <text class="seats">人数: {{item.passenger_number}}</text>
-          </view>
-
-          <!-- 可编辑的价格和空位 -->
-          <view class="edit-section">
-            <view class="edit-item">
-              <text class="label">价格:</text>
-              <input type="digit" value="{{item.price}}" 
-                     data-id="{{item._id}}" 
-                     bindinput="updateRequestPrice"
-                     class="edit-input"/>
-            </view>
-            <view class="edit-item">
-              <text class="label">人数:</text>
-              <input type="number" value="{{item.passenger_number}}" 
-                     data-id="{{item._id}}" 
-                     bindinput="updatePassengerNumber"
-                     class="edit-input"/>
-            </view>
-          </view>
-
-          <!-- 保存和删除按钮 -->
-          <view class="action-section">
-            <button class="action-btn save-btn" 
-                    bindtap="saveRequestUpdates" 
-                    data-id="{{item._id}}">保存修改</button>
-            <button class="action-btn delete-btn" 
-                    bindtap="deletePublishedRequest" 
-                    data-id="{{item._id}}">删除</button>
-          </view>
-        </view>
-      </view>
-    </block>
-  </view>
-</scroll-view>
+  <block wx:for="{{myPublished}}" wx:key="_id">
+    <template is="rideCard" data="{{ item: item, currentTab: currentTab }}"/>
+  </block>
+</block>

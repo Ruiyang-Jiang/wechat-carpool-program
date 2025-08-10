@@ -1,163 +1,68 @@
-.container {
-  padding: 20rpx;
+/* 通用卡片样式 */
+.ride-card, .publisher-card{
+  margin: 20rpx 24rpx;
+  padding: 24rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 6rpx 18rpx rgba(0,0,0,.05);
+}
+.ride-card.past{ opacity:.55; }
+
+/* header */
+.ride-header{
+  display:flex;
+  align-items:center;
+  margin-bottom:12rpx;
+}
+.badge{
+  padding:4rpx 16rpx;
+  font-size:24rpx;
+  border-radius:16rpx;
+  margin-right:12rpx;
+}
+.badge-driver   { background:#E8F9E5; color:#1BA400; }
+.badge-passenger{ background:#E5F1FF; color:#0061CC; }
+
+.ride-date{ font-size:26rpx; }
+.date-past{ color:#999; text-decoration:line-through; }
+
+.expired-badge{
+  margin-left:12rpx;
+  font-size:24rpx;
+  color:#F76161;
 }
 
-/* 信息标题 */
-.title {
-  font-size: 36rpx;
-  font-weight: bold;
-  margin-bottom: 20rpx;
-  text-align: center;
+/* body rows */
+.ride-body .row{
+  display:flex;
+  align-items:center;
+  margin:8rpx 0;
+  font-size:26rpx;
 }
+.bold{ font-weight:600; }
 
 /* 发布者信息 */
-.publisher-info {
-  background: #fff;
-  padding: 20rpx;
-  border-radius: 12rpx;
-  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
-  margin-bottom: 30rpx;
+.publisher-row{
+  display:flex;
+  align-items:center;
+  margin:6rpx 0;
+  font-size:26rpx;
+}
+.publisher-row button{
+  margin-left:20rpx;
+  transform:scale(0.9);
 }
 
-.info-row {
-  display: flex;
-  align-items: center;
-  margin: 15rpx 0;
+/* 操作按钮 */
+.action-btn{
+  margin:40rpx 24rpx;
+  font-size:32rpx;
 }
 
-.info {
-  flex: 1;
-  color: var(--text-secondary);
-}
-
-/* 详情卡片 */
-.detail-card {
-  background: #fff;
-  padding: 20rpx;
-  border-radius: 12rpx;
-  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
-  margin-bottom: 30rpx;
-}
-
-.detail-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 15rpx 0;
-  border-bottom: 2rpx solid var(--border-color);
-}
-
-.detail-row:last-child {
-  border-bottom: none;
-}
-
-.label {
-  color: var(--text-secondary);
-}
-
-/* 按钮区域 */
-.button-section {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20rpx;
-}
-
-.accept-btn {
-  background: var(--primary-color);
-  color: white;
-  padding: 12rpx;
-  border-radius: 8rpx;
-  font-size: 34rpx;
-  flex: 1;
-  margin-right: 10rpx;
-}
-
-.edit-btn {
-  background: var(--warning-color);
-  color: white;
-  padding: 12rpx;
-  border-radius: 8rpx;
-  font-size: 34rpx;
-  flex: 1;
-  margin-right: 10rpx;
-}
-
-.delete-btn {
-  background: var(--danger-color);
-  color: white;
-  padding: 12rpx;
-  border-radius: 8rpx;
-  font-size: 34rpx;
-  flex: 1;
-}
-
-.copy-btn {
-  margin: 0;
-  padding: 10rpx 30rpx;
-  font-size: 26rpx;
-  background: #07c160;  /* 微信绿色 */
-  color: white;
-  border-radius: 30rpx;
-  min-width: 160rpx;
-}
-
-.action-section {
-  padding: 30rpx 20rpx;
-}
-
-.action-btn {
-  width: 100%;
-  margin-bottom: 20rpx;
-}
-
-.ride-btn {
-  background: var(--success-color);
-}
-
-.accept-btn {
-  background: var(--primary-color);
-  color: white;
-}
-
-.edit-btn {
-  background: var(--warning-color);
-  color: white;
-}
-
-.delete-btn {
-  background: var(--danger-color);
-  color: white;
-}
-
-.action-btn:active {
-  opacity: 0.8;
-}
-
-/* 禁用状态 */
-.action-btn[disabled] {
-  background: #cccccc;
-  color: #ffffff;
-  opacity: 0.6;
-}
-
-.loading {
-  text-align: center;
-  padding: 40rpx;
-  color: #999;
-}
-
-.wechat-info {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 20rpx 0;
-}
-
-.copy-btn:active {
-  opacity: 0.8;
-}
-
-/* 隐藏的微信号样式 */
-.info text.hidden {
-  font-family: monospace;
-  letter-spacing: 2rpx;
+/* loading */
+.page-loading{
+  padding:120rpx 0;
+  text-align:center;
+  font-size:30rpx;
+  color:#999;
 }

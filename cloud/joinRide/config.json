@@ -1,0 +1,11 @@
+{
+  "name": "joinRide",
+  "envId": "carpool-0gazzzn11db221a4",   
+  "runtime": "Nodejs18",               
+  "memorySize": 128,                   
+  "timeout": 10,                      
+  "permissions": {
+    "openapi": [],                     
+    "cloud": ["database"]             
+  }
+}

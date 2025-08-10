@@ -1,351 +1,204 @@
 // pages/publish/publish.js
-const { searchCities, validateCity } = require('../../utils/us-cities.js');
-const db = wx.cloud.database();
+const { searchCities, validateCity } = require('../../utils/us-cities.js')
+
+const DEBUG = true                         // <<< 统一开关
+
+function log(...args){ DEBUG && console.log('[publish]', ...args) }
+function warn(...args){ DEBUG && console.warn('[publish]', ...args) }
 
 Page({
-  data: {
-    // 当前子Tab: passenger(我要找车) / driver(我要发车)
-    currentSubTab: 'passenger',
+  data:{
+    /* ------- 页面 / 组件状态 ------- */
+    currentSubTab: 'driver',      // 默认 Tab：'driver'=找乘客，'passenger'=找司机
+    todayString:   '',            // onLoad 中写入“YYYY-MM-DD”
+    currentTime:   '',            // onLoad 中写入“HH:mm”
+  
+    /* ------- 位置相关 ------- */
+    departure_place:{ city:'', state:'', lat:null, lng:null },
+    arrival_place:  { city:'', state:'', lat:null, lng:null },
+  
+    /* ------- 出发信息 ------- */
+    departure_date: '',           // 出发日期（picker）
+    departure_time: '',           // 出发时间（picker）
+    car_model:      '',           // 车型
+    empty_seats:    3,            // 司机模式：剩余座位
+    passenger_number:1,           // 乘客模式：乘客人数
+    price:          '',           // 价格/人
+    contact_wechat: '',           // 微信号
+  
+    /* ------- 下拉联想 ------- */
+    departureSuggestions: [],     // 出发城市建议列表
+    arrivalSuggestions:  []       // 目的城市建议列表
+  },
+  /* ---------- 生命周期 ---------- */
+  onLoad(){
+    const now = new Date()
+    const yyyy = now.getFullYear()
+    const mm   = String(now.getMonth()+1).padStart(2,'0')
+    const dd   = String(now.getDate()).padStart(2,'0')
+    const hh   = String(now.getHours()).padStart(2,'0')
+    const min  = String(now.getMinutes()).padStart(2,'0')
 
-    // 地址相关字段
-    departure_place: {
-      city: '',     // 完整城市名 (e.g., "Ithaca, NY")
-      state: '',  // 州
-      lat: null,  // 纬度
-      lng: null   // 经度
-    },
-    arrival_place: {
-      city: '',
-      state: '',
-      lat: null,
-      lng: null
-    },
-    departureSuggestions: [],
-    arrivalSuggestions: [],
+    this.setData({ todayString:`${yyyy}-${mm}-${dd}`, currentTime:`${hh}:${min}` })
+    log('todayString', this.data.todayString, 'currentTime', this.data.currentTime)
 
-    // 乘客和司机共同的字段
-    departure_date: '',
-    departure_time: '',
-    price: '',
-    car_model: '',   // 🚗 车辆型号（选填）
-
-    // 仅乘客模式需要的字段
-    passenger_number: 1, // 乘客人数
-
-    // 仅司机模式需要的字段
-    empty_seats: 3, // 空余座位
-
-    // 用于日期和时间控件的限制
-    todayString: '',      // 例如 "2025-03-01"
-    currentTime: '',      // 例如 "14:30"
-
-    regions: ['United States', 'China', 'Other'],
-    regionIndex: 0,
-
-    contact_wechat: '', // 添加微信号字段
+    const userInfo = wx.getStorageSync('userInfo')||{}
+    if(userInfo.wechat) this.setData({ contact_wechat:userInfo.wechat })
+    log('cached wechat', userInfo.wechat||'none')
   },
 
-  onLoad() {
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const dd = String(now.getDate()).padStart(2, '0');
-    const hh = String(now.getHours()).padStart(2, '0');
-    const min = String(now.getMinutes()).padStart(2, '0');
-    
-    this.setData({
-      todayString: `${yyyy}-${mm}-${dd}`,
-      currentTime: `${hh}:${min}`,
-    });
+  /* ---------- Tab 切换 ---------- */
+  onSubTabChange(e){
+    const tab = e.currentTarget.dataset.tab
+    log('switch tab ->', tab)
+    this.setData({ currentSubTab: tab })
+  },
 
-    // 尝试从用户信息中获取已保存的微信号
-    const userInfo = wx.getStorageSync('userInfo') || {};
-    if (userInfo.wechat) {
-      this.setData({
-        contact_wechat: userInfo.wechat
-      });
+  /* ---------- 城市输入 & 选择 ---------- */
+  onDepartureInput(e){
+    const v = e.detail.value.trim()
+    this.setData({ 'departure_place.city': v })
+    const sug = v ? searchCities(v) : []
+    log('dep input', v, 'suggest', sug.length)
+    this.setData({ departureSuggestions: sug })
+  },
+  chooseDeparture(e){
+    const item = e.currentTarget.dataset.item
+    log('choose departure', item)
+    this.setData({ departure_place:{ ...item }, departureSuggestions:[] })
+  },
+  onArrivalInput(e){
+    const v = e.detail.value.trim()
+    this.setData({ 'arrival_place.city': v })
+    const sug = v ? searchCities(v) : []
+    log('arr input', v, 'suggest', sug.length)
+    this.setData({ arrivalSuggestions: sug })
+  },
+  chooseArrival(e){
+    const item = e.currentTarget.dataset.item
+    log('choose arrival', item)
+    this.setData({ arrival_place:{ ...item }, arrivalSuggestions:[] })
+  },
+
+  /* ---------- 通用输入 ---------- */
+  onInputChange(e){
+    const { field } = e.currentTarget.dataset
+    this.setData({ [field]: e.detail.value })
+    log('input', field, '->', e.detail.value)
+  },
+
+  /* ---------- 日期 / 时间 ---------- */
+  onDepartDateChange(e){
+    this.setData({ departure_date:e.detail.value })
+    log('depart date', e.detail.value)
+    if(e.detail.value !== this.data.todayString) this.setData({ currentTime:'00:00' })
+  },
+  onDepartTimeChange(e){
+    this.setData({ departure_time:e.detail.value })
+    log('depart time', e.detail.value)
+  },
+
+  /* ---------- 提交 ---------- */
+  submitRide(){
+    const d = this.data
+    const mode     = d.currentSubTab === 'passenger' ? 'request' : 'ride'
+    const funcName = mode === 'ride' ? 'createRide' : 'createRideRequest'
+
+    /* ========== 基础校验（所有情况都要） ========== */
+    if (!d.departure_place.city || !validateCity(d.departure_place.city)){
+      return wx.showToast({ title:'请选择有效的出发城市', icon:'none' })
     }
-  },
-
-  // 切换子Tab
-  onSubTabChange(e) {
-    this.setData({
-      currentSubTab: e.currentTarget.dataset.tab
-    });
-  },
-
-  // 处理出发地输入
-  onDepartureInput(e) {
-    const value = e.detail.value;
-    console.log('Input value:', value);
-    
-    this.setData({
-      'departure_place.city': value
-    });
-
-    if (!value.trim()) {
-      this.setData({ departureSuggestions: [] });
-      return;
+    if (!d.arrival_place.city || !validateCity(d.arrival_place.city)){
+      return wx.showToast({ title:'请选择有效的目的城市', icon:'none' })
     }
-
-    const suggestions = searchCities(value);
-    console.log('Suggestions:', suggestions);
-    
-    // 确保在主线程中更新数据
-    setTimeout(() => {
-      this.setData({ 
-        departureSuggestions: suggestions 
-      });
-    }, 0);
-  },
-
-  // 选择出发地
-  chooseDeparture(e) {
-    const item = e.currentTarget.dataset.item;
-    console.log('Selected item:', item);
-    
-    this.setData({
-      departure_place: {
-        city: item.city,
-        state: item.state,
-        lat: item.lat,
-        lng: item.lng
-      },
-      departureSuggestions: []
-    });
-  },
-
-  // 处理目的地输入
-  onArrivalInput(e) {
-    const value = e.detail.value;
-    console.log('Input value:', value);
-    this.setData({
-      'arrival_place.city': value
-    });
-
-    if (!value.trim()) {
-      this.setData({ arrivalSuggestions: [] });
-      return;
+    if (!d.departure_date){
+      return wx.showToast({ title:'请选择出发日期', icon:'none' })
+    }
+    if (!d.departure_time){
+      return wx.showToast({ title:'请选择出发时间', icon:'none' })
+    }
+    if (!d.price){
+      return wx.showToast({ title:'请输入价格', icon:'none' })
+    }
+    if (!d.contact_wechat.trim()){
+      return wx.showToast({ title:'请输入微信号', icon:'none' })
     }
 
-    const suggestions = searchCities(value);
-    this.setData({ arrivalSuggestions: suggestions });
-  },
-
-  // 选择目的地
-  chooseArrival(e) {
-    const item = e.currentTarget.dataset.item;
-    this.setData({
-      arrival_place: {
-        city: item.city,
-        state: item.state,
-        lat: item.lat,
-        lng: item.lng
-      },
-      arrivalSuggestions: []
-    });
-  },
-
-  // 通用输入处理
-  onInputChange(e) {
-    const field = e.currentTarget.dataset.field;
-    this.setData({
-      [field]: e.detail.value
-    });
-  },
-
-  // 出发日期
-  onDepartDateChange(e) {
-    this.setData({
-      departure_date: e.detail.value
-    });
-  },
-  // 出发时间
-  onDepartTimeChange(e) {
-    this.setData({
-      departure_time: e.detail.value
-    });
-  },
-  // 抵达日期
-  onArriveDateChange(e) {
-    this.setData({
-      arrival_date: e.detail.value
-    });
-  },
-  // 抵达时间
-  onArriveTimeChange(e) {
-    this.setData({
-      arrival_time: e.detail.value
-    });
-  },
-
-  // 提交发布
-  submitRide() {
-    const {
-      currentSubTab,
-      departure_place,
-      arrival_place,
-      departure_date,
-      departure_time,
-      price,
-      passenger_number,
-      empty_seats,
-      car_model,
-      contact_wechat  // 获取微信号
-    } = this.data;
-
-    // 验证城市格式
-    console.log("departure_place", departure_place)
-    console.log(departure_place.city)
-    console.log(validateCity(departure_place.city))
-    if (!departure_place.city || !validateCity(departure_place.city)) {
-      wx.showToast({
-        title: '请从列表中选择有效的出发城市',
-        icon: 'none'
-      });
-      return;
-    }
-
-    console.log(arrival_place)
-    if (!arrival_place.city || !validateCity(arrival_place.city)) {
-      wx.showToast({
-        title: '请从列表中选择有效的目的城市',
-        icon: 'none'
-      });
-      return;
-    }
-
-    // 验证微信号
-    if (!contact_wechat.trim()) {
-      wx.showToast({
-        title: '请输入微信号',
-        icon: 'none'
-      });
-      return;
-    }
-
-    // 简单校验
-    if (!departure_date) {
-      wx.showToast({ title: '请选择出发日期', icon: 'none' });
-      return;
-    }
-    if (!departure_time) {
-      wx.showToast({ title: '请选择出发时间', icon: 'none' });
-      return;
-    }
-    if (!price) {
-      wx.showToast({ title: '请输入价格', icon: 'none' });
-      return;
-    }
-
-    // 获取当前用户 openid
-    const openid = wx.getStorageSync('openid');
-    if (!openid) {
-      wx.showToast({ title: '请先登录', icon: 'none' });
-      return;
-    }
-
-    // 更新用户信息中的微信号
-    const db = wx.cloud.database();
-    db.collection('users').where({
-      _openid: openid
-    }).update({
-      data: {
-        wechat: contact_wechat
+    /* ========== 分支校验 ========== */
+    if (mode === 'ride'){ // 司机发布
+      if (!d.empty_seats){
+        return wx.showToast({ title:'请输入空余座位数', icon:'none' })
       }
-    }).then(() => {
-      // 保存到本地存储
-      const userInfo = wx.getStorageSync('userInfo') || {};
-      userInfo.wechat = contact_wechat;
-      wx.setStorageSync('userInfo', userInfo);
-    });
-
-    // 构建发布数据
-    const rideData = {
-      publisher_id: openid,
-      departure_place: {
-        city: departure_place.city,
-        state: departure_place.state,
-        lat: departure_place.lat,
-        lng: departure_place.lng
-      },
-      arrival_place: {
-        city: arrival_place.city,
-        state: arrival_place.state,
-        lat: arrival_place.lat,
-        lng: arrival_place.lng
-      },
-      departure_date,
-      departure_time,
-      price: parseFloat(price) || 0,
-      contact_wechat,  // 添加微信号到发布数据
-      status: 'open',
-      create_time: db.serverDate()
-    };
-
-    if (currentSubTab === 'passenger') {
-      Object.assign(rideData, {
-        passenger_number: parseInt(passenger_number) || 1,
-        has_driver: false
-      });
-      
-      db.collection('rideRequest').add({
-        data: rideData
-      }).then(() => {
-        wx.showToast({ title: '发布成功', icon: 'success' });
-        this.resetForm();
-      }).catch(err => {
-        console.error('发布失败:', err);
-        wx.showToast({ title: '发布失败', icon: 'none' });
-      });
-    } else {
-      Object.assign(rideData, {
-        empty_seats: parseInt(empty_seats) || 3,
-        car_model: car_model || '',
-        has_driver: true,
-        passengers: []
-      });
-
-      db.collection('rides').add({
-        data: rideData
-      }).then(() => {
-        wx.showToast({ title: '发布成功', icon: 'success' });
-        this.resetForm();
-      }).catch(err => {
-        console.error('发布失败:', err);
-        wx.showToast({ title: '发布失败', icon: 'none' });
-      });
+      const seats = parseInt(d.empty_seats,10)
+      if (isNaN(seats) || seats <= 0){
+        return wx.showToast({ title:'空余座位需为正整数', icon:'none' })
+      }
+    }else{               // 乘客需求
+      if (!d.passenger_number){
+        return wx.showToast({ title:'请输入乘坐人数', icon:'none' })
+      }
+      const num = parseInt(d.passenger_number,10)
+      if (isNaN(num) || num <= 0){
+        return wx.showToast({ title:'乘坐人数需为正整数', icon:'none' })
+      }
     }
+
+    /* ========== 构造 payload & 调云函数 ========== */
+    const payload = {
+      departure_place: d.departure_place,
+      arrival_place:   d.arrival_place,
+      departure_date:  d.departure_date,
+      departure_time:  d.departure_time,
+      price:           Number(d.price),
+      contact_wechat:  d.contact_wechat,
+      car_model:       d.car_model,                   // ✅ 可空发送
+      passenger_number: mode==='request'
+                        ? parseInt(d.passenger_number,10)
+                        : 0,
+      empty_seats:     mode==='ride'
+                        ? parseInt(d.empty_seats,10)
+                        : 0
+    }
+
+    // 防止重复提交
+    if (this.data.submitting) {
+      return wx.showToast({ title: '正在提交中...', icon: 'none' })
+    }
+
+    this.setData({ submitting: true })
+
+    wx.cloud.callFunction({
+      name: funcName,
+      data: payload,
+      success: res=>{
+        if(res.result.ok){
+          wx.showToast({ title:'发布成功', icon:'success' })
+          this.resetForm()
+        }else{
+          wx.showToast({ title:res.result.msg||'后端校验失败', icon:'none' })
+        }
+      },
+      fail: err=>{
+        console.error(err)
+        wx.showToast({ title:'发布失败', icon:'none' })
+      },
+      complete: () => {
+        this.setData({ submitting: false })
+      }
+    })
   },
 
-  // 重置表单
-  resetForm() {
+  /* ---------- 重置 ---------- */
+  resetForm(){
     this.setData({
-      departure_place: {
-        city: '',
-        state: '',
-        lat: null,
-        lng: null
-      },
-      departure_date: '',
-      departure_time: '',
-      arrival_place: {
-        city: '',
-        state: '',
-        lat: null,
-        lng: null
-      },
-      price: '',
-      passenger_number: 1,
-      empty_seats: 3,
-      car_model: '',  // 🚗 重置汽车型号
-      contact_wechat: '', // 重置微信号
-    });
-  },
-
-  onRegionChange(e) {
-    this.setData({
-      regionIndex: e.detail.value
-    });
+      departure_place:{ city:'',state:'',lat:null,lng:null },
+      arrival_place:  { city:'',state:'',lat:null,lng:null },
+      departure_date:this.data.todayString,
+      departure_time:this.data.currentTime,
+      price:'', passenger_number:1, empty_seats:3,
+      car_model:'', contact_wechat:'',
+      submitting: false
+    })
   }
-});
+
+})

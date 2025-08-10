@@ -36,6 +36,16 @@ Page({
         }
       }).catch((err) => {
         console.error("数据库查询失败:", err);
+        // 如果是集合不存在的错误，尝试初始化数据库
+        if (err.code === 'DATABASE_COLLECTION_NOT_EXIST') {
+          this.initializeDatabase();
+        } else {
+          wx.showToast({
+            title: '数据库连接失败，请稍后重试',
+            icon: 'none'
+          });
+        }
+        this.setData({ loggedIn: false });
       });
     }
   },
@@ -137,6 +147,37 @@ Page({
       },
       fail: () => {
         wx.showToast({ title: "微信登录失败", icon: "none" });
+      }
+    });
+  },
+
+  /**
+   * 初始化数据库（创建必要的集合）
+   */
+  initializeDatabase() {
+    console.log('尝试初始化数据库...');
+    wx.cloud.callFunction({
+      name: 'databaseMigration',
+      data: { action: 'migrate' },
+      success: (res) => {
+        console.log('数据库初始化成功:', res);
+        if (res.result.success) {
+          wx.showToast({
+            title: '数据库初始化成功',
+            icon: 'success'
+          });
+          // 重新检查登录状态
+          setTimeout(() => {
+            this.checkLoginStatus();
+          }, 1000);
+        }
+      },
+      fail: (err) => {
+        console.error('数据库初始化失败:', err);
+        wx.showToast({
+          title: '数据库初始化失败，请联系管理员',
+          icon: 'none'
+        });
       }
     });
   }

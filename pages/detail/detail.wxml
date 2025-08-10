@@ -1,46 +1,73 @@
-<view class="container">
-  <!-- 发布者信息 -->
-  <view class="publisher-info">
-    <text class="title">发布者信息</text>
-    <text class="info">姓名: {{publisherInfo.nickname || '未知'}}</text>
-    <view class="wechat-info">
-      <text class="info">微信号: ******</text>
-      <button class="copy-btn" bindtap="handleCopyWeChat">
-        点击获取微信号
-      </button>
+<!-- 页面骨架：简要 loading -->
+<view wx:if="{{isLoading}}" class="page-loading">加载中...</view>
+
+<block wx:else>
+  <!-- ======= 行程信息卡 ======= -->
+  <view class="ride-card {{detail.isPast?'past':''}}">
+    <!-- header -->
+    <view class="ride-header">
+      <text class="badge {{detail.type==='ride'?'badge-driver':'badge-passenger'}}">
+        {{detail.type==='ride'?'找乘客':'找司机'}}
+      </text>
+      <text class="ride-date {{detail.isPast?'date-past':''}}">
+        {{detail.departure_date}} {{detail.departure_time||'00:00'}}
+      </text>
+      <text wx:if="{{detail.isPast}}" class="expired-badge">已过期</text>
     </view>
-    <text class="info">电话: {{publisherInfo.phone || '未提供'}}</text>
+
+    <!-- body -->
+    <view class="ride-body">
+      <view class="row">
+        <text>出发地：</text>
+        <text class="bold">{{detail.departure_place.city}}, {{detail.departure_place.state}}</text>
+      </view>
+      <view class="row">
+        <text>目的地：</text>
+        <text class="bold">{{detail.arrival_place.city}}, {{detail.arrival_place.state}}</text>
+      </view>
+
+      <!-- ============ 找乘客（ride）专属字段 ============ -->
+      <block wx:if="{{detail.type==='ride'}}">
+        <view class="row">
+          <text>空余座位：</text><text class="bold">{{detail.empty_seats}}</text>
+        </view>
+
+        <!-- 👉 车型：仅当有填写时显示 👈 -->
+        <view class="row" wx:if="{{detail.car_model}}">
+          <text>车型：</text><text class="bold">{{detail.car_model}}</text>
+        </view>
+      </block>
+
+      <!-- ============ 找司机（request）专属字段 ============ -->
+      <block wx:elif="{{detail.type==='request'}}">
+        <view class="row">
+          <text>乘坐人数：</text><text class="bold">{{detail.passenger_number}}</text>
+        </view>
+      </block>
+
+      <!-- 共用字段：价格 -->
+      <view class="row">
+        <text>价格：</text><text class="bold">{{detail.price}}</text>
+      </view>
+    </view>
   </view>
 
-  <!-- 顺风车/人找车信息 -->
-  <view class="detail-card">
-    <text class="title">顺风车详情</text>
-    <view class="detail-row">
-      <text class="label">出发地:</text>
-      <text>{{detail.departure_place.city}}, {{detail.departure_place.state}}</text>
+  <!-- ======= 发布者信息 ======= -->
+  <view class="publisher-card">
+    <view class="publisher-row">
+      <text>发布者：</text>
+      <text class="bold">{{publisherInfo.nickName || '用户'}}</text>
     </view>
-    <view class="detail-row">
-      <text class="label">目的地:</text>
-      <text>{{detail.arrival_place.city}}, {{detail.arrival_place.state}}</text>
-    </view>
-    <view class="detail-row">
-      <text class="label">出发时间:</text>
-      <text>{{detail.departure_date}} {{detail.departure_time || '未知'}}</text>
-    </view>
-    <view class="detail-row">
-      <text class="label">价格:</text>
-      <text>¥{{detail.price}}</text>
-    </view>
-    <view wx:if="{{itemType === 'rides'}}" class="detail-row">
-      <text class="label">空余座位:</text>
-      <text>{{detail.empty_seats}}</text>
+    <view class="publisher-row">
+      <text>联系微信：</text>
+      <text class="bold">{{publisherInfo.wechat || '未提供'}}</text>
+      <button type="primary" size="mini" bindtap="handleCopyWeChat" wx:if="{{publisherInfo.wechat}}">复制</button>
     </view>
   </view>
 
-  <!-- 接单按钮 -->
-  <view class="button-section">
-    <button class="accept-btn" bindtap="takeOrder">接单</button>
-    <button class="edit-btn" wx:if="{{isOwner}}" bindtap="editItem">修改</button>
-    <button class="delete-btn" wx:if="{{isOwner}}" bindtap="deleteItem">删除</button>
-  </view>
-</view>
+  <!-- ======= 操作按钮 ======= -->
+  <button class="action-btn" type="primary" bindtap="takeOrder"
+          wx:if="{{userOpenid && userOpenid !== detail.publisher_id}}">
+    {{detail.type==='ride' ? '我要乘坐' : '我要接单'}}
+  </button>
+</block>

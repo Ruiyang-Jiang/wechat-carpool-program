@@ -1,0 +1,6 @@
+{
+  "name": "acceptRideRequest",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

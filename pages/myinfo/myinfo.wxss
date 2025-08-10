@@ -1,314 +1,92 @@
-.container {
-  padding: 20rpx;
-  background-color: #f8f8f8;
+/* ---------- 顶部 Tab ---------- */
+.tabs{
+  display:flex;
+  background:#fff;
+  border-bottom:1rpx solid #f2f2f2;
+}
+.tab{
+  flex:1;
+  text-align:center;
+  padding:24rpx 0;
+  font-size:30rpx;
+  color:#666;
+}
+.tab.active{
+  color:#07c160;
+  font-weight:600;
+  border-bottom:4rpx solid #07c160;
 }
 
-/* 用户信息 */
-.user-info {
-  display: flex;
-  align-items: center;
-  padding: 30rpx 0;
+/* ---------- 卡片 ---------- */
+.ride-card{
+  margin:20rpx 24rpx;
+  padding:24rpx;
+  background:#fff;
+  border-radius:16rpx;
+  box-shadow:0 6rpx 18rpx rgba(0,0,0,.04);
 }
-.avatar {
-  width: 100rpx;
-  height: 100rpx;
-  border-radius: 50%;
-  margin-right: 20rpx;
+.ride-card.past{ opacity:.55; }
+
+/* header */
+.ride-header{
+  display:flex;
+  align-items:center;
+  margin-bottom:12rpx;
 }
-.nickname {
-  font-size: 36rpx;
-  font-weight: bold;
+.badge{
+  padding:4rpx 16rpx;
+  font-size:24rpx;
+  border-radius:16rpx;
+  margin-right:12rpx;
+}
+.badge-driver    { background:#E8F9E5; color:#1BA400; }
+.badge-passenger { background:#E5F1FF; color:#0061CC; }
+
+.ride-date{ font-size:26rpx; }
+.date-past{ color:#999; text-decoration:line-through; }
+
+.expired-badge{
+  margin-left:12rpx;
+  font-size:24rpx;
+  color:#F76161;
 }
 
-/* 联系方式 */
-.user-contact {
-  margin-top: 20rpx;
-}
-.info-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20rpx;
-}
-.label {
-  font-size: 30rpx;
-  width: 150rpx;
-}
-.input {
-  flex: 1;
-  padding: 10rpx;
-  border: 1px solid #ddd;
-  border-radius: 10rpx;
-}
-.save-btn {
-  margin-top: 20rpx;
-  background-color: #ff5722;
-  color: white;
-  font-size: 30rpx;
+/* body */
+.ride-body .row{
+  display:flex;
+  align-items:center;
+  margin:8rpx 0;
+  font-size:26rpx;
 }
 
-/* 订单切换 */
-.tab-switch {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 30rpx;
-  padding: 20rpx 0;
-  border-bottom: 2rpx solid #ddd;
+/* 统一左侧标签宽度，输入框自动撑开 */
+.field-label{
+  width:170rpx;          /* 如有需要可微调 */
+  flex-shrink:0;
+  font-size:26rpx;
+  color:#333;
 }
-.tab {
-  font-size: 32rpx;
-  padding: 10rpx 20rpx;
-  color: gray;
-}
-.active {
-  font-weight: bold;
-  color: #ff5722;
+.bold{ font-weight:600; }
+
+.edit-input{
+  flex:1;
+  margin-left:16rpx;
+  padding:10rpx 14rpx;
+  border:2rpx solid #07c160;
+  border-radius:10rpx;
+  background:#f6fff5;
+  font-size:30rpx;
 }
 
-/* 订单列表 */
-.ride-list {
-  margin-top: 20rpx;
+/* 按钮组 */
+.btn-group{
+  display:flex;
+  gap:24rpx;
+  margin-top:16rpx;
 }
-.ride-card {
-  padding: 20rpx;
-  margin-bottom: 20rpx;
-  background: #fff;
-  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
-  border-radius: 10rpx;
-}
-.title {
-  font-size: 36rpx;
-  font-weight: bold;
-  margin-bottom: 20rpx;
-  text-align: center;
-}
-
-.ride-item {
-  margin: 20rpx;
-  border-radius: 16rpx;
-  overflow: hidden;
-}
-
-.ride-header {
-  padding: 20rpx;
-  background: var(--primary-color);
-  color: white;
-}
-
-.date, .time {
-  font-size: 26rpx;
-  opacity: 0.9;
-}
-
-.ride-content {
-  padding: 20rpx;
-  background: white;
-}
-
-.location-info {
-  margin: 15rpx 0;
-}
-
-.departure, .arrival {
-  display: flex;
-  align-items: center;
-  margin: 10rpx 0;
-}
-
-.icon {
-  width: 40rpx;
-  height: 40rpx;
-  line-height: 40rpx;
-  text-align: center;
-  border-radius: 20rpx;
-  margin-right: 15rpx;
-  font-size: 24rpx;
-  color: white;
-}
-
-.departure .icon {
-  background: var(--primary-color);
-}
-
-.arrival .icon {
-  background: var(--success-color);
-}
-
-.ride-details {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 15rpx;
-  padding-top: 15rpx;
-  border-top: 1rpx solid #eee;
-}
-
-.price {
-  color: #ff5722;
-  font-weight: bold;
-}
-
-.seats {
-  color: #666;
-}
-
-input {
-  width: 100%;
-  padding: 10rpx;
-  margin: 10rpx 0;
-  font-size: 32rpx;
-  border: 1px solid #ddd;
-  border-radius: 8rpx;
-}
-
-button {
-  width: 100%;
-  margin-top: 10rpx;
-}
-
-.tab-bar {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 20rpx;
-}
-
-.tab-bar button {
-  flex: 1;
-  padding: 10rpx;
-  font-size: 30rpx;
-  background-color: #ddd;
-  color: #333;
-  border: none;
-  border-radius: 10rpx;
-  margin-right: 10rpx;
-}
-
-.tab-bar button.active {
-  background-color: #00aa00;
-  color: #fff;
-}
-
-.section-title {
-  font-size: 32rpx;
-  font-weight: bold;
-  margin: 30rpx 20rpx 10rpx;
-  color: #333;
-}
-
-.ride-item, .request-item {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10rpx;
-  padding: 20rpx;
-  margin-bottom: 20rpx;
-}
-
-.label {
-  font-weight: bold;
-  margin-right: 10rpx;
-}
-
-.input-group {
-  display: flex;
-  align-items: center;
-  margin-top: 10rpx;
-}
-
-input {
-  flex: 1;
-  padding: 8rpx;
-  border: 1px solid #ccc;
-  border-radius: 6rpx;
-  margin-left: 10rpx;
-}
-
-.action-btn {
-  flex: 1;
-  height: 80rpx;
-  line-height: 80rpx;
-  border-radius: 40rpx;
-  font-size: 28rpx;
-  font-weight: 500;
-}
-
-.edit-btn {
-  background: #ffa500;
-  color: white;
-}
-
-.delete-btn {
-  background: #ff5722;
-  color: white;
-}
-
-.action-btn:active {
-  opacity: 0.8;
-}
-
-.action-section {
-  display: flex;
-  gap: 20rpx;
-  margin-top: 20rpx;
-}
-
-.scroll-container {
-  height: 100vh;
-}
-
-.tab-bar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  background: white;
-  padding: 20rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.1);
-}
-
-.tab-item {
-  flex: 1;
-  text-align: center;
-  padding: 20rpx 0;
-  font-size: 28rpx;
-  color: #666;
-  position: relative;
-}
-
-.tab-item.active {
-  color: #007AFF;
-  font-weight: bold;
-}
-
-.tab-item.active:after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40rpx;
-  height: 4rpx;
-  background: #007AFF;
-  border-radius: 2rpx;
-}
-
-.edit-section {
-  margin: 20rpx 0;
-  padding: 20rpx;
-  background: var(--background);
-  border-radius: 12rpx;
-}
-
-.edit-item {
-  margin: 15rpx 0;
-}
-
-.edit-input {
-  height: 80rpx;
-  padding: 0 20rpx;
-  background: white;
-  border: 2rpx solid var(--border-color);
-  border-radius: 8rpx;
-}
-
-.save-btn {
-  background: #007AFF;
-  color: white;
+.empty-tip{
+  padding:120rpx 0;
+  text-align:center;
+  font-size:28rpx;
+  color:#999;
 }

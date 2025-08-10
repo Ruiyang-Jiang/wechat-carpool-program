@@ -1,112 +1,84 @@
-/* 设置整体页面背景和基本间距 */
-.container {
-  display: block;
-  width: 100%;
-  padding: 30rpx 26rpx;
-  background: var(--background);
+/* ---------- 顶部 Tab ---------- */
+.tabs{
+  display:flex;
+  background:#fff;
+  border-bottom:1rpx solid #f2f2f2;
+}
+.tab{
+  flex:1;
+  text-align:center;
+  padding:24rpx 0;
+  font-size:30rpx;
+  color:#666;
+}
+.tab.active{
+  color:#07c160;
+  font-weight:600;
+  border-bottom:4rpx solid #07c160;
 }
 
-/* segmented tab */
-.segmented {
-  display: flex;
-  width: 80%;
-  margin-bottom: 30rpx;
-  margin: 0 auto 30rpx auto;
-  border: 2rpx solid var(--primary-color);
-  border-radius: 50rpx;
-  overflow: hidden;
-  
-}
-.seg-btn {
-  flex: 1;
-  text-align: center;
-  line-height: 66rpx;
-  font-size: 30rpx;
-  color: var(--primary-color);
-  background: #fff;
-}
-.seg-btn.active {
-  background: var(--primary-color);
-  color: #fff;
+/* ---------- 表单卡片 ---------- */
+.form-card{
+  margin:24rpx;
+  padding:30rpx 24rpx;
+  background:#fff;
+  border-radius:18rpx;
+  box-shadow:0 6rpx 20rpx rgba(0,0,0,.04);
 }
 
-/* 每个搜索卡片 */
-.search-card {
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 44rpx 32rpx 36rpx 32rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0,0,0,.06);
-  margin-bottom: 36rpx;
+/* 行 */
+.input-row{
+  display:flex;
+  align-items:center;
+  margin:20rpx 0;
+}
+.label{
+  width:160rpx;
+  font-size:28rpx;
+  color:#333;
+}
+.input{
+  flex:1;
+  padding:16rpx 20rpx;
+  font-size:28rpx;
+  background:#f7f7f7;
+  border:1rpx solid #e0e0e0;
+  border-radius:12rpx;
 }
 
-/* 输入框 + 图标 */
-.input-group {
-  width: 100%;
-  margin-bottom: 28rpx;
-  position: relative;
-}
-.input-group .icon {
-  position: absolute;
-  width: 34rpx; height: 34rpx;
-  left: 20rpx; top: 50%;
-  transform: translateY(-50%);
-  opacity: .8;
-  padding: 0%;
-}
-.input-group input {
-  width: 100%;
-  height: 86rpx;
-  padding: 0 20rpx 0 70rpx;   /* 预留图标空间 */
-  border: 2rpx solid #e2e2e2;
-  border-radius: 12rpx;
-  font-size: 28rpx;
-  padding: 0%;
+/* picker look like input */
+.picker{
+  flex:1;
+  padding:16rpx 20rpx;
+  font-size:28rpx;
+  color:#333;
+  background:#f7f7f7;
+  border:1rpx solid #e0e0e0;
+  border-radius:12rpx;
 }
 
-/* 日期按钮 */
-.date-btn {
-  width: 100%;
-  height: 86rpx;
-  line-height: 86rpx;
-  border: 2rpx dashed #c5c5c5;
-  border-radius: 12rpx;
-  color: #999;
-  background: #fafafa;
-  margin-bottom: 28rpx;
+/* 搜索按钮 */
+.search-btn{
+  margin-top:32rpx;
+  font-size:30rpx;
+  background:#07c160;
 }
-.date-btn::after { border: none; } /* 去除默认按钮边框 */
 
-/* 主要按钮 */
-.primary-btn {
-  width: 100%;
-  height: 86rpx;
-  line-height: 86rpx;
-  border-radius: 12rpx;
-  font-size: 32rpx;
-  background: var(--success-color);
-  color: #fff;
-  padding: 0%;
+/* ---------- 城市下拉建议 ---------- */
+.suggestion-list{
+  margin-top:-10rpx;
+  background:#fff;
+  border:1rpx solid #e0e0e0;
+  border-top:none;
+  border-radius:0 0 12rpx 12rpx;
+  max-height:300rpx;
+  overflow-y:auto;
+  box-shadow:0 4rpx 12rpx rgba(0,0,0,.05);
 }
-.primary-btn:active { opacity: .8; }
-
-/* 让页面自适应不同屏幕 */
-@media screen and (max-width: 400px) {
-  .search-block {
-    padding: 20rpx;
-  }
-  .search-block input,
-  .search-block picker,
-  .search-block button {
-    font-size: 28rpx;
-    padding: 15rpx;
-  }
+.suggest-item{
+  padding:18rpx 26rpx;
+  font-size:28rpx;
+  color:#333;
 }
-.suggest-item {
-  padding: 22rpx 30rpx;
-  font-size: 28rpx;
-  color: #333;
-  border-bottom: 1rpx solid #f0f0f0;
-  transition: background 0.15s;
-}
+.suggest-item + .suggest-item{ border-top:1rpx solid #f3f3f3; }
+.suggest-item:active{ background:#f2fdf4; }

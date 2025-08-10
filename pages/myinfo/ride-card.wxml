@@ -1,0 +1,90 @@
+<template name="rideCard">
+  <view class="ride-card {{item.isPast ? 'past' : ''}}">
+
+    <!-- ===== Header ===== -->
+    <view class="ride-header">
+      <text class="badge {{item.type === 'ride' ? 'badge-driver' : 'badge-passenger'}}">
+        {{item.displayType}}
+      </text>
+      <text class="ride-date {{item.isPast ? 'date-past' : ''}}">
+        {{item.departure_date}} {{item.departure_time || '00:00'}}
+      </text>
+      <text wx:if="{{item.isPast}}" class="expired-badge">已过期</text>
+    </view>
+
+    <!-- ===== Body ===== -->
+    <view class="ride-body">
+      <view class="row">
+        <text class="field-label">出发地：</text>
+        <text class="bold">{{item.departure_place.city}}, {{item.departure_place.state}}</text>
+      </view>
+
+      <view class="row">
+        <text class="field-label">目的地：</text>
+        <text class="bold">{{item.arrival_place.city}}, {{item.arrival_place.state}}</text>
+      </view>
+
+      <!-- ------- 找乘客 (ride) ------- -->
+      <block wx:if="{{item.type === 'ride'}}">
+        <view class="row">
+          <text class="field-label">空余座位：</text>
+
+          <!-- 可编辑 -->
+          <input wx:if="{{currentTab === 'mine' || currentTab === 'driver'}}"
+                 class="edit-input"
+                 type="number"
+                 value="{{item.empty_seats}}"
+                 data-id="{{item._id}}"
+                 data-field="empty_seats"
+                 bindinput="{{currentTab === 'mine' ? 'onMineFieldInput' : 'onDriverFieldInput'}}"/>
+
+          <!-- 只读 -->
+          <text wx:else class="bold">{{item.empty_seats}}</text>
+        </view>
+      </block>
+
+      <!-- ------- 找司机 (request) ------- -->
+      <block wx:elif="{{item.type === 'request'}}">
+        <view class="row">
+          <text class="field-label">乘坐人数：</text>
+
+          <input wx:if="{{currentTab === 'mine' || currentTab === 'driver'}}"
+                 class="edit-input"
+                 type="number"
+                 value="{{item.passenger_number}}"
+                 data-id="{{item._id}}"
+                 data-field="passenger_number"
+                 bindinput="{{currentTab === 'mine' ? 'onMineFieldInput' : 'onDriverFieldInput'}}"/>
+
+          <text wx:else class="bold">{{item.passenger_number}}</text>
+        </view>
+      </block>
+
+      <!-- 共用：价格 -->
+      <view class="row">
+        <text class="field-label">价格：</text>
+
+        <input wx:if="{{currentTab === 'mine' || currentTab === 'driver'}}"
+               class="edit-input"
+               type="number"
+               value="{{item.price}}"
+               data-id="{{item._id}}"
+               data-field="price"
+               bindinput="{{currentTab === 'mine' ? 'onMineFieldInput' : 'onDriverFieldInput'}}"/>
+
+        <text wx:else class="bold">{{item.price}}</text>
+      </view>
+
+      <!-- ===== 按钮组 ===== -->
+      <view class="btn-group" wx:if="{{currentTab === 'mine' || currentTab === 'driver'}}">
+        <button type="primary" size="mini"
+                bindtap="{{currentTab === 'mine' ? 'saveMine' : 'saveDriver'}}"
+                data-id="{{item._id}}">保存</button>
+
+        <!-- 只有“我发布”可删除 -->
+        <button wx:if="{{currentTab === 'mine'}}" type="warn" size="mini"
+                bindtap="closeRide" data-id="{{item._id}}">删除</button>
+      </view>
+    </view>
+  </view>
+</template>
