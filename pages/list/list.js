@@ -5,10 +5,15 @@ const _  = db.command
 /* ---------- 公共工具 ---------- */
 function decorate (ride) {
   const timestamp = new Date(`${ride.departure_date} ${ride.departure_time || '00:00'}`).getTime()
+  const userOpenid = wx.getStorageSync('openid') || ''
+  
   return {
     ...ride,
     isPast: timestamp < Date.now(),
-    displayType: ride.type === 'ride' ? '找乘客' : '找司机'
+    displayType: ride.type === 'ride' ? '找乘客' : '找司机',
+    isOwnRequest: ride.type === 'request' && ride.publisher_id === userOpenid,
+    hasJoined: ride.type === 'request' && Array.isArray(ride.participants) && 
+               ride.participants.some(p => p.openid === userOpenid)
   }
 }
 
@@ -93,8 +98,28 @@ Page({
   /* ============ 加载「车找人」(ride) ============ */
   loadPassengerData () {
     if (this.data.showPassengerSearchPrompt) return
-    const search = this.data.passengerSearch
 
+    // 优先使用搜索结果
+    const searchResults = wx.getStorageSync('searchResults')
+    if (searchResults && Array.isArray(searchResults)) {
+      const sorted = this.sortPassenger(searchResults).map(item => {
+        const decorated = decorate(item)
+        // 添加匹配类型标识
+        if (item.matchType) {
+          decorated.matchType = item.matchType
+          decorated.matchLabel = this.getMatchLabel(item.matchType)
+        }
+
+        return decorated
+      })
+      this.setData({ passengerData: sorted })
+      // 清除搜索结果缓存
+      wx.removeStorageSync('searchResults')
+      return
+    }
+
+    // 降级到原有查询方式
+    const search = this.data.passengerSearch
     let query = db.collection('rides').where({
       type: 'ride',
       status: 'open'
@@ -121,11 +146,40 @@ Page({
       })
   },
 
+  /* ============ 获取匹配类型标签 ============ */
+  getMatchLabel(matchType) {
+    const labels = {
+      'exact': '精确匹配',
+      'stopover': '途经点匹配',
+      'partial': '部分匹配'
+    }
+    return labels[matchType] || ''
+  },
+
   /* ============ 加载「人找车」(request) ============ */
   loadDriverData () {
     if (this.data.showDriverSearchPrompt) return
-    const search = this.data.driverSearch
 
+    // 优先使用搜索结果
+    const searchResults = wx.getStorageSync('searchResults')
+    if (searchResults && Array.isArray(searchResults)) {
+      const sorted = this.sortDriver(searchResults).map(item => {
+        const decorated = decorate(item)
+        // 添加匹配类型标识
+        if (item.matchType) {
+          decorated.matchType = item.matchType
+          decorated.matchLabel = this.getMatchLabel(item.matchType)
+        }
+        return decorated
+      })
+      this.setData({ driverData: sorted })
+      // 清除搜索结果缓存
+      wx.removeStorageSync('searchResults')
+      return
+    }
+
+    // 降级到原有查询方式
+    const search = this.data.driverSearch
     let query = db.collection('rides').where({
       type: 'request',
       status: 'open'
@@ -234,6 +288,42 @@ Page({
     const { id, type } = e.currentTarget.dataset     // 'ride' | 'request'
     wx.navigateTo({
       url: `/pages/detail/detail?type=${type === 'ride' ? 'rides' : 'request'}&id=${id}`
+    })
+  },
+
+  /* ---------------- Join请求处理 ---------------- */
+  handleStopPropagation() {
+    // 阻止事件冒泡到父级卡片点击事件
+  },
+
+  joinRequest(e) {
+    const requestId = e.currentTarget.dataset.id
+    if (!requestId) return
+
+    wx.showLoading({ title: '加入中...', mask: true })
+    wx.cloud.callFunction({
+      name: 'joinRequestAsPassenger',
+      data: { requestId },
+      success: (res) => {
+        wx.hideLoading()
+        if (res.result && res.result.ok) {
+          wx.showToast({ title: '加入成功', icon: 'success' })
+          // 刷新当前列表数据
+          if (this.data.currentView === 'driver') {
+            this.loadDriverData()
+          }
+        } else {
+          wx.showToast({ 
+            title: (res.result && res.result.msg) || '加入失败', 
+            icon: 'none' 
+          })
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading()
+        console.error('Join request failed:', err)
+        wx.showToast({ title: '操作失败', icon: 'none' })
+      }
     })
   }
 })

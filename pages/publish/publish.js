@@ -1,5 +1,5 @@
 // pages/publish/publish.js
-const { searchCities, validateCity } = require('../../utils/us-cities.js')
+const { primeCities, searchCities, validateCity } = require('../../utils/us-cities-optimized.js')
 
 const DEBUG = true                         // <<< 统一开关
 
@@ -28,10 +28,17 @@ Page({
   
     /* ------- 下拉联想 ------- */
     departureSuggestions: [],     // 出发城市建议列表
-    arrivalSuggestions:  []       // 目的城市建议列表
+    arrivalSuggestions:  [],      // 目的城市建议列表
+
+    /* ------- 途经点功能 ------- */
+    stopovers: [],                // 途经点列表
+    stopoverSuggestions: [],      // 途经点建议列表
+    showStopoverInput: false      // 是否显示途经点输入框
   },
   /* ---------- 生命周期 ---------- */
   onLoad(){
+    // 预热城市数据
+    primeCities().catch(()=>{})
     const now = new Date()
     const yyyy = now.getFullYear()
     const mm   = String(now.getMonth()+1).padStart(2,'0')
@@ -56,9 +63,9 @@ Page({
 
   /* ---------- 城市输入 & 选择 ---------- */
   onDepartureInput(e){
-    const v = e.detail.value.trim()
+    const v = e.detail.value
     this.setData({ 'departure_place.city': v })
-    const sug = v ? searchCities(v) : []
+    const sug = v.trim() ? searchCities(v.trim()) : []
     log('dep input', v, 'suggest', sug.length)
     this.setData({ departureSuggestions: sug })
   },
@@ -68,9 +75,9 @@ Page({
     this.setData({ departure_place:{ ...item }, departureSuggestions:[] })
   },
   onArrivalInput(e){
-    const v = e.detail.value.trim()
+    const v = e.detail.value
     this.setData({ 'arrival_place.city': v })
-    const sug = v ? searchCities(v) : []
+    const sug = v.trim() ? searchCities(v.trim()) : []
     log('arr input', v, 'suggest', sug.length)
     this.setData({ arrivalSuggestions: sug })
   },
@@ -157,7 +164,8 @@ Page({
                         : 0,
       empty_seats:     mode==='ride'
                         ? parseInt(d.empty_seats,10)
-                        : 0
+                        : 0,
+      stopovers:       d.stopovers
     }
 
     // 防止重复提交
@@ -188,6 +196,74 @@ Page({
     })
   },
 
+  /* ---------- 途经点管理 ---------- */
+  addStopover() {
+    this.setData({
+      showStopoverInput: true,
+      stopoverSuggestions: []
+    })
+  },
+
+  cancelStopoverInput() {
+    this.setData({
+      showStopoverInput: false,
+      stopoverSuggestions: []
+    })
+  },
+
+  toggleStopoverInput() {
+    this.setData({
+      showStopoverInput: !this.data.showStopoverInput,
+      stopoverSuggestions: []
+    })
+  },
+
+  onStopoverInput(e) {
+    const value = e.detail.value.trim()
+    if (!value) {
+      this.setData({ stopoverSuggestions: [] })
+      return
+    }
+
+    // 使用相同的城市建议逻辑
+    const suggestions = searchCities(value)
+    this.setData({ stopoverSuggestions: suggestions })
+  },
+
+  chooseStopover(e) {
+    const item = e.currentTarget.dataset.item
+    const stopovers = [...this.data.stopovers]
+
+    // 检查是否已存在
+    const exists = stopovers.some(s => s.city === item.city && s.state === item.state)
+    if (exists) {
+      wx.showToast({ title: '该途经点已存在', icon: 'none' })
+      return
+    }
+
+    // 检查是否与出发地或目的地重复
+    const { departure_place, arrival_place } = this.data
+    if ((departure_place.city === item.city && departure_place.state === item.state) ||
+        (arrival_place.city === item.city && arrival_place.state === item.state)) {
+      wx.showToast({ title: '经停点不能与出发地或目的地相同', icon: 'none' })
+      return
+    }
+
+    stopovers.push(item)
+    this.setData({
+      stopovers,
+      stopoverSuggestions: [],
+      showStopoverInput: false
+    })
+  },
+
+  removeStopover(e) {
+    const index = e.currentTarget.dataset.index
+    const stopovers = [...this.data.stopovers]
+    stopovers.splice(index, 1)
+    this.setData({ stopovers })
+  },
+
   /* ---------- 重置 ---------- */
   resetForm(){
     this.setData({
@@ -197,6 +273,8 @@ Page({
       departure_time:this.data.currentTime,
       price:'', passenger_number:1, empty_seats:3,
       car_model:'', contact_wechat:'',
+      stopovers: [],
+      showStopoverInput: false,
       submitting: false
     })
   }

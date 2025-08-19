@@ -26,6 +26,16 @@
         <text class="bold">{{detail.arrival_place.city}}, {{detail.arrival_place.state}}</text>
       </view>
 
+      <!-- 途经点显示 -->
+      <view wx:if="{{detail.stopovers && detail.stopovers.length}}" class="row">
+        <text>途经点：</text>
+        <view class="stopovers-display">
+          <block wx:for="{{detail.stopovers}}" wx:key="index">
+            <text class="stopover-tag">{{item.city}}, {{item.state}}</text>
+          </block>
+        </view>
+      </view>
+
       <!-- ============ 找乘客（ride）专属字段 ============ -->
       <block wx:if="{{detail.type==='ride'}}">
         <view class="row">
@@ -49,6 +59,9 @@
       <view class="row">
         <text>价格：</text><text class="bold">{{detail.price}}</text>
       </view>
+      <view class="row">
+        <text style="font-size:22rpx;color:#999;">到经停点价格需与司机协商</text>
+      </view>
     </view>
   </view>
 
@@ -63,11 +76,23 @@
       <text class="bold">{{publisherInfo.wechat || '未提供'}}</text>
       <button type="primary" size="mini" bindtap="handleCopyWeChat" wx:if="{{publisherInfo.wechat}}">复制</button>
     </view>
+    <!-- 仅对请求展示参与者联系方式列表 -->
+    <view wx:if="{{detail.type==='request' && participantsInfo && participantsInfo.length}}" style="margin-top:12rpx;">
+      <view class="publisher-row"><text class="bold">参与者微信：</text></view>
+      <block wx:for="{{participantsInfo}}" wx:key="openid">
+        <view class="publisher-row">
+          <text>{{item.nickName || '乘客'}}</text>
+          <text class="bold" style="margin-left:8rpx;">{{item.wechat || '未提供'}}</text>
+          <button wx:if="{{item.wechat}}" type="default" size="mini" data-wxid="{{item.wechat}}" bindtap="copyParticipantWeChat">复制</button>
+        </view>
+      </block>
+    </view>
   </view>
 
   <!-- ======= 操作按钮 ======= -->
-  <button class="action-btn" type="primary" bindtap="takeOrder"
-          wx:if="{{userOpenid && userOpenid !== detail.publisher_id}}">
-    {{detail.type==='ride' ? '我要乘坐' : '我要接单'}}
-  </button>
+  <block wx:if="{{userOpenid && userOpenid !== detail.publisher_id}}">
+    <button class="action-btn" type="primary" bindtap="takeOrder" wx:if="{{detail.type==='ride'}}">我要乘坐</button>
+    <button class="action-btn" type="primary" bindtap="takeOrder" wx:if="{{detail.type==='request' && canDriverAccept}}">我要接单</button>
+    <button class="action-btn" type="default"  bindtap="joinAsPassenger" wx:if="{{detail.type==='request' && canJoinAsPassenger}}">加入此请求</button>
+  </block>
 </block>

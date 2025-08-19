@@ -12,7 +12,8 @@ exports.main = async (event, context) => {
     departure_place, arrival_place,
     departure_date, departure_time = '',
     price = 0, empty_seats = 3,
-    car_model = '', contact_wechat = ''
+    car_model = '', contact_wechat = '',
+    stopovers = []  // 新增：途经点数组
   } = event
 
   /* ---- (略) 参数校验，可保留 ---- */
@@ -31,10 +32,11 @@ exports.main = async (event, context) => {
       publisher_id: openid, driver_id: openid,
       departure_place, arrival_place,
       departure_date, departure_time,
-      price:Number(price)||0, 
+      price:Number(price)||0,
       empty_seats: Number(empty_seats),
       car_model, passenger_number:0,
       passengers:[], contact_wechat,
+      stopovers: stopovers || [],  // 新增：途经点
       created_at: db.serverDate(),
       updated_at: db.serverDate()
     }

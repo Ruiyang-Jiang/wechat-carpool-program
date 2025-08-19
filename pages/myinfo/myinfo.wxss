@@ -78,6 +78,23 @@
   font-size:30rpx;
 }
 
+/* 途经点显示样式 */
+.stopovers-display{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6rpx;
+  margin-top:4rpx;
+}
+
+.stopover-tag{
+  background:#e3f2fd;
+  color:#1976d2;
+  padding:4rpx 8rpx;
+  border-radius:12rpx;
+  font-size:22rpx;
+  border:1rpx solid #bbdefb;
+}
+
 /* 按钮组 */
 .btn-group{
   display:flex;

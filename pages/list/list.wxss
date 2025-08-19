@@ -67,6 +67,94 @@
   font-size: 26rpx;
 }
 .ride-body .row .bold { font-weight: 600; }
+
+/* 途经点样式 */
+.stopovers-row{
+  display:flex;
+  align-items:flex-start;
+  margin-top:8rpx;
+}
+
+.stopovers-label{
+  font-size:26rpx;
+  color:#666;
+  margin-right:8rpx;
+  flex-shrink:0;
+}
+
+.stopovers-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6rpx;
+}
+
+.stopover-item{
+  background:#e8f4fd;
+  color:#1976d2;
+  padding:4rpx 8rpx;
+  border-radius:12rpx;
+  font-size:22rpx;
+  border:1rpx solid #bbdefb;
+}
+
+.stopovers-display{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6rpx;
+  margin-top:4rpx;
+}
+
+.stopover-tag{
+  background:#e3f2fd;
+  color:#1976d2;
+  padding:4rpx 8rpx;
+  border-radius:12rpx;
+  font-size:22rpx;
+  border:1rpx solid #bbdefb;
+}
+
+/* 匹配类型标签 */
+.match-badge{
+  background:#fff3e0;
+  color:#f57c00;
+  padding:4rpx 8rpx;
+  border-radius:8rpx;
+  font-size:20rpx;
+  border:1rpx solid #ffcc02;
+  margin-left:8rpx;
+}
+/* ---------- Join按钮样式 ---------- */
+.join-actions{
+  margin-top:16rpx;
+  padding-top:12rpx;
+  border-top:1rpx solid #f0f0f0;
+  display:flex;
+  justify-content:flex-end;
+}
+
+.join-btn{
+  font-size:24rpx;
+  padding:8rpx 20rpx;
+  border-radius:20rpx;
+  border:none;
+}
+
+.join-btn.primary{
+  background:#07c160;
+  color:#fff;
+}
+
+.join-btn.disabled{
+  background:#f5f5f5;
+  color:#999;
+}
+
+.join-btn.joined{
+  background:#e8f5e8;
+  color:#52c41a;
+  border:1rpx solid #b7eb8f;
+}
+
 /* ---------- 排序条 ---------- */
 .sort-bar{
   display:flex;

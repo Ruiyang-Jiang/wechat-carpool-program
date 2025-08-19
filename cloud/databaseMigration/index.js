@@ -239,6 +239,14 @@ async function insertSampleData() {
       passengers: [],
       car_model: 'Toyota Camry',
       contact_wechat: 'test_wechat',
+      stopovers: [
+        {
+          city: 'Philadelphia, PA',
+          state: 'PA',
+          lat: 39.9526,
+          lng: -75.1652
+        }
+      ],
       created_at: db.serverDate(),
       updated_at: db.serverDate()
     }

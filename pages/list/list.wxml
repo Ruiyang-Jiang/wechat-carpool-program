@@ -47,6 +47,7 @@
         <!-- header -->
         <view class="ride-header">
           <text class="badge badge-driver">{{item.displayType}}</text>
+          <text wx:if="{{item.matchLabel}}" class="match-badge">{{item.matchLabel}}</text>
           <text class="ride-date {{item.isPast?'date-past':''}}">
             {{item.departure_date}} {{item.departure_time||'00:00'}}
           </text>
@@ -61,11 +62,24 @@
           <view class="row">
             <text>目的地：</text><text class="bold">{{item.arrival_place.city}}, {{item.arrival_place.state}}</text>
           </view>
+
+          <!-- 途经点显示 -->
+          <view wx:if="{{item.stopovers && item.stopovers.length}}" class="stopovers-row">
+            <text class="stopovers-label">途经：</text>
+            <view class="stopovers-list">
+              <block wx:for="{{item.stopovers}}" wx:key="index" wx:for-item="stopover">
+                <text class="stopover-item">{{stopover.city}}{{stopover.state ? ', ' + stopover.state : ''}}</text>
+              </block>
+            </view>
+          </view>
           <view class="row">
             <text>空余座位：</text><text class="bold">{{item.empty_seats}}</text>
           </view>
           <view class="row">
             <text>价格：</text><text class="bold">{{item.price}}</text>
+          </view>
+          <view class="row">
+            <text style="font-size:22rpx;color:#999;">到经停点价格需与司机协商</text>
           </view>
         </view>
       </view>
@@ -113,6 +127,7 @@
             bindtap="chooseItem">
         <view class="ride-header">
           <text class="badge badge-passenger">{{item.displayType}}</text>
+          <text wx:if="{{item.matchLabel}}" class="match-badge">{{item.matchLabel}}</text>
           <text class="ride-date {{item.isPast?'date-past':''}}">
             {{item.departure_date}} {{item.departure_time||'00:00'}}
           </text>
@@ -126,11 +141,37 @@
           <view class="row">
             <text>目的地：</text><text class="bold">{{item.arrival_place.city}}, {{item.arrival_place.state}}</text>
           </view>
+          <!-- 途经点显示（请求也可包含） -->
+          <view wx:if="{{item.stopovers && item.stopovers.length}}" class="stopovers-row">
+            <text class="stopovers-label">途经：</text>
+            <view class="stopovers-list">
+              <block wx:for="{{item.stopovers}}" wx:key="index" wx:for-item="stopover">
+                <text class="stopover-item">{{stopover.city}}</text>
+              </block>
+            </view>
+          </view>
           <view class="row">
             <text>乘坐人数：</text><text class="bold">{{item.passenger_number}}</text>
           </view>
           <view class="row">
             <text>期望价格：</text><text class="bold">{{item.price}}</text>
+          </view>
+          
+          <!-- Join按钮区域 -->
+          <view class="join-actions" catchtap="handleStopPropagation">
+            <!-- 自己发布的请求 -->
+            <button wx:if="{{item.isOwnRequest}}" class="join-btn disabled" disabled>
+              我的请求
+            </button>
+            <!-- 他人发布的请求 - 未加入 -->
+            <button wx:elif="{{!item.hasJoined}}" class="join-btn primary" 
+                    data-id="{{item._id}}" bindtap="joinRequest">
+              加入请求
+            </button>
+            <!-- 他人发布的请求 - 已加入 -->
+            <button wx:else class="join-btn joined" disabled>
+              已加入
+            </button>
           </view>
         </view>
       </view>

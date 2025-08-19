@@ -1,4 +1,4 @@
-const { searchCities, validateCity } = require('../../utils/us-cities.js');
+const { searchCities, validateCity } = require('../../utils/us-cities-optimized.js');
 
 Page({
   data: {
@@ -200,7 +200,7 @@ Page({
   // 搜索车找人
   searchRides() {
     const { departure_place, arrival_place, searchDate } = this.data;
-    
+
     if (!departure_place.city || !validateCity(departure_place.city)) {
       wx.showToast({ title: '请选择有效的出发城市', icon: 'none' });
       return;
@@ -214,20 +214,52 @@ Page({
       return;
     }
 
-    wx.setStorageSync('carSearch', {
-      departure_place,
-      arrival_place,
-      departure_date: searchDate
+    // 使用增强搜索功能
+    wx.showLoading({ title: '搜索中...', mask: true });
+
+    wx.cloud.callFunction({
+      name: 'searchRides',
+      data: {
+        type: 'ride',
+        departure_place,
+        arrival_place,
+        departure_date: searchDate
+      },
+      success: (res) => {
+        wx.hideLoading();
+        if (res.result.ok) {
+          // 保存搜索结果到本地存储
+          wx.setStorageSync('searchResults', res.result.data);
+          wx.setStorageSync('carSearch', {
+            departure_place,
+            arrival_place,
+            departure_date: searchDate
+          });
+          wx.setStorageSync('currentView', 'passenger');
+          wx.switchTab({ url: '/pages/list/list' });
+        } else {
+          wx.showToast({ title: res.result.msg || '搜索失败', icon: 'none' });
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading();
+        console.error('搜索失败:', err);
+        // 降级到原有搜索方式
+        wx.setStorageSync('carSearch', {
+          departure_place,
+          arrival_place,
+          departure_date: searchDate
+        });
+        wx.setStorageSync('currentView', 'passenger');
+        wx.switchTab({ url: '/pages/list/list' });
+      }
     });
-    
-    wx.setStorageSync('currentView', 'passenger');
-    wx.switchTab({ url: '/pages/list/list' });
   },
 
   // 搜索人找车
   searchPeople() {
     const { search2Departure, search2Destination, search2Date } = this.data;
-    
+
     if (!search2Departure.city || !validateCity(search2Departure.city)) {
       wx.showToast({ title: '请选择有效的出发城市', icon: 'none' });
       return;
@@ -241,13 +273,45 @@ Page({
       return;
     }
 
-    wx.setStorageSync('peopleSearch', {
-      departure_place: search2Departure,
-      arrival_place: search2Destination,
-      departure_date: search2Date
+    // 使用增强搜索功能
+    wx.showLoading({ title: '搜索中...', mask: true });
+
+    wx.cloud.callFunction({
+      name: 'searchRides',
+      data: {
+        type: 'request',
+        departure_place: search2Departure,
+        arrival_place: search2Destination,
+        departure_date: search2Date
+      },
+      success: (res) => {
+        wx.hideLoading();
+        if (res.result.ok) {
+          // 保存搜索结果到本地存储
+          wx.setStorageSync('searchResults', res.result.data);
+          wx.setStorageSync('peopleSearch', {
+            departure_place: search2Departure,
+            arrival_place: search2Destination,
+            departure_date: search2Date
+          });
+          wx.setStorageSync('currentView', 'driver');
+          wx.switchTab({ url: '/pages/list/list' });
+        } else {
+          wx.showToast({ title: res.result.msg || '搜索失败', icon: 'none' });
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading();
+        console.error('搜索失败:', err);
+        // 降级到原有搜索方式
+        wx.setStorageSync('peopleSearch', {
+          departure_place: search2Departure,
+          arrival_place: search2Destination,
+          departure_date: search2Date
+        });
+        wx.setStorageSync('currentView', 'driver');
+        wx.switchTab({ url: '/pages/list/list' });
+      }
     });
-    
-    wx.setStorageSync('currentView', 'driver');
-    wx.switchTab({ url: '/pages/list/list' });
   }
 });

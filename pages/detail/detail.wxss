@@ -53,6 +53,23 @@
   transform:scale(0.9);
 }
 
+/* 途经点显示样式 */
+.stopovers-display{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8rpx;
+  margin-top:8rpx;
+}
+
+.stopover-tag{
+  background:#e3f2fd;
+  color:#1976d2;
+  padding:6rpx 12rpx;
+  border-radius:16rpx;
+  font-size:24rpx;
+  border:1rpx solid #bbdefb;
+}
+
 /* 操作按钮 */
 .action-btn{
   margin:40rpx 24rpx;

@@ -1,1 +1,9 @@
-{ "dependencies": { "wx-server-sdk": "latest" } }
+{
+  "name": "closeRide",
+  "version": "1.0.0",
+  "description": "关闭顺风车云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

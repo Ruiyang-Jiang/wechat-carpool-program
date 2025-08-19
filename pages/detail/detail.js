@@ -8,7 +8,10 @@ Page({
     detail:   null,
     publisherInfo: {},
     userOpenid: '',
-    isLoading: true
+    isLoading: true,
+    participantsInfo: [],
+    canJoinAsPassenger: false,
+    canDriverAccept: true
   },
 
   /* ---------- 页面加载 ---------- */
@@ -27,13 +30,35 @@ Page({
   loadDetail() {
     db.collection('rides').doc(this.data.itemId).get()
       .then(res => {
-        this.setData({ detail: res.data, isLoading:false })
+        const detail = res.data
+        const canJoinAsPassenger = detail.type === 'request'
+          && this.data.userOpenid
+          && this.data.userOpenid !== detail.publisher_id
+          && !(Array.isArray(detail.participants) && detail.participants.some(p => p.openid === this.data.userOpenid))
+        const canDriverAccept = detail.type === 'request'
+          && this.data.userOpenid
+          && this.data.userOpenid !== detail.publisher_id
+        this.setData({ detail, isLoading:false, canJoinAsPassenger, canDriverAccept })
         if (res.data.publisher_id) this.loadPublisher(res.data.publisher_id)
+        if (detail.type === 'request') this.loadParticipantsUsers(detail)
       })
       .catch(err=>{
         console.error(err)
         wx.showToast({ title:'加载失败', icon:'none' })
         this.setData({ isLoading:false })
+      })
+  },
+
+  /* ---------- 参与者信息 ---------- */
+  loadParticipantsUsers(detail){
+    const ids = (detail.participants || []).map(p => p.openid)
+    if (!ids.length) return
+    db.collection('users').where({ _id: _.in(ids) }).get()
+      .then(res => {
+        const map = {}
+        res.data.forEach(u => { map[u._id] = u })
+        const participantsInfo = ids.map(id => ({ openid: id, nickName: map[id]?.nickName || '', wechat: map[id]?.wechat || '' }))
+        this.setData({ participantsInfo })
       })
   },
 
@@ -54,6 +79,12 @@ Page({
       wx.showToast({ title:'未提供微信号', icon:'none' })
       return
     }
+    wx.setClipboardData({ data: wxid })
+  },
+
+  copyParticipantWeChat(e){
+    const wxid = e.currentTarget.dataset.wxid
+    if (!wxid) return
     wx.setClipboardData({ data: wxid })
   },
 
@@ -96,16 +127,20 @@ Page({
         if (!res.confirm) return
         wx.showLoading({ title:'提交中...', mask:true })
         wx.cloud.callFunction({
-          name:'acceptRequest',
+          name:'joinRequest',
           data:{ requestId: itemId },
-          success:_=>{
-            wx.showToast({ title:'接单成功', icon:'success' })
-            // 1.5s 后跳“我的”-> 接单记录 并携带参数
-            setTimeout(()=>{
-              wx.switchTab({
-                url:'/pages/myinfo/myinfo?tab=driver&from=accept'
-              })
-            }, 1500)
+          success: result => {
+            if (result.result.ok) {
+              wx.showToast({ title:'接单成功', icon:'success' })
+              // 1.5s 后跳“我的”-> 接单记录 并携带参数
+              setTimeout(()=>{
+                wx.switchTab({
+                  url:'/pages/myinfo/myinfo?tab=driver&from=accept'
+                })
+              }, 1500)
+            } else {
+              wx.showToast({ title: result.result.msg || '接单失败', icon:'none' })
+            }
           },
           fail: err=>{
             console.error(err)
@@ -114,6 +149,31 @@ Page({
           complete: ()=>wx.hideLoading()
         })
       }
+    })
+  }
+  ,
+
+  /* ---------- 作为乘客加入人找车请求 ---------- */
+  joinAsPassenger(){
+    const { itemId, detail } = this.data
+    if (detail.type !== 'request') return
+    wx.showLoading({ title:'提交中...', mask:true })
+    wx.cloud.callFunction({
+      name:'joinRequestAsPassenger',
+      data:{ requestId: itemId },
+      success: result => {
+        if (result.result && result.result.ok) {
+          wx.showToast({ title:'已加入', icon:'success' })
+          this.loadDetail()
+        } else {
+          wx.showToast({ title: (result.result && result.result.msg) || '加入失败', icon:'none' })
+        }
+      },
+      fail: err => {
+        console.error(err)
+        wx.showToast({ title:'操作失败', icon:'none' })
+      },
+      complete: () => wx.hideLoading()
     })
   }
 })

@@ -1,14 +1,14 @@
 <!-- ===================== 顶部子 Tab ===================== -->
 <view class="tabs">
-  <view class="tab {{currentSubTab==='driver'?'active':''}}" data-tab="driver"    bindtap="onSubTabChange">司机发布</view>
-  <view class="tab {{currentSubTab==='passenger'?'active':''}}" data-tab="passenger" bindtap="onSubTabChange">乘客需求</view>
+  <view class="tab {{currentSubTab==='driver'?'active':''}}" data-tab="driver"    bindtap="onSubTabChange">车找人</view>
+  <view class="tab {{currentSubTab==='passenger'?'active':''}}" data-tab="passenger" bindtap="onSubTabChange">人找车</view>
 </view>
 
 <!-- ===================== 表单卡片 ===================== -->
 <view class="form-card">
   <!-- 出发城市 -->
   <view class="input-row">
-    <text class="label">出发城市</text>
+    <text class="label">出发城市1</text>
     <input class="input"
            placeholder="输入出发城市"
            value="{{departure_place.city}}"
@@ -23,7 +23,63 @@
     </block>
   </view>
 
-  <!-- 目的城市 -->
+  <!-- 经停点管理区域 -->
+  <view class="route-section">
+    <view class="route-header">
+      <text class="route-title">行程路线</text>
+      <button class="add-stopover-btn-inline" size="mini" bindtap="addStopover">
+        + 添加经停点
+      </button>
+    </view>
+    
+    <!-- 完整路线显示 -->
+    <view class="route-display">
+      <!-- 出发地 -->
+      <view class="route-point departure">
+        <view class="point-icon">🚗</view>
+        <view class="point-content">
+          <text class="point-label">出发地</text>
+          <text class="point-city">{{departure_place.city || '请选择出发城市'}}</text>
+        </view>
+      </view>
+      
+      <!-- 经停点列表 -->
+      <block wx:for="{{stopovers}}" wx:key="index">
+        <view class="route-connector"></view>
+        <view class="route-point stopover">
+          <view class="point-icon">📍</view>
+          <view class="point-content">
+            <text class="point-label">经停点 {{index + 1}}</text>
+            <text class="point-city">{{item.city}}, {{item.state}}</text>
+          </view>
+          <button class="remove-point-btn" size="mini" data-index="{{index}}" bindtap="removeStopover">
+            ×
+          </button>
+        </view>
+      </block>
+      
+      <!-- 目的地 -->
+      <view class="route-connector"></view>
+      <view class="route-point destination">
+        <view class="point-icon">🏁</view>
+        <view class="point-content">
+          <text class="point-label">目的地</text>
+          <text class="point-city">{{arrival_place.city || '请选择目的城市'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 出发地建议 -->
+  <view class="suggestion-list" wx:if="{{departureSuggestions.length}}">
+    <block wx:for="{{departureSuggestions}}" wx:key="city">
+      <view class="suggest-item" data-item="{{item}}" bindtap="chooseDeparture">
+        {{item.city}}, {{item.state}}
+      </view>
+    </block>
+  </view>
+
+  <!-- 城市选择输入框（目的地） -->
   <view class="input-row">
     <text class="label">目的城市</text>
     <input class="input"
@@ -38,6 +94,27 @@
         {{item.city}}, {{item.state}}
       </view>
     </block>
+  </view>
+
+  <!-- 经停点输入框 -->
+  <view wx:if="{{showStopoverInput}}" class="stopover-input-overlay">
+    <view class="stopover-input-modal">
+      <view class="modal-header">
+        <text>添加经停点</text>
+        <button class="close-btn" bindtap="cancelStopoverInput">×</button>
+      </view>
+      <input class="stopover-input" 
+             placeholder="输入经停城市"
+             bindinput="onStopoverInput" 
+             auto-focus />
+      <view class="suggestion-list" wx:if="{{stopoverSuggestions.length}}">
+        <block wx:for="{{stopoverSuggestions}}" wx:key="city">
+          <view class="suggest-item" data-item="{{item}}" bindtap="chooseStopover">
+            {{item.city}}, {{item.state}}
+          </view>
+        </block>
+      </view>
+    </view>
   </view>
 
   <!-- 出发日期 & 时间 -->
@@ -79,9 +156,11 @@
              data-field="empty_seats"
              bindinput="onInputChange" />
     </view>
+
+
   </block>
 
-  <!-- 乘客需求：乘坐人数 -->
+  <!-- 乘客需求：乘坐人数 & 途经点 -->
   <block wx:elif="{{currentSubTab==='passenger'}}">
     <view class="input-row">
       <text class="label">乘坐人数</text>
@@ -113,6 +192,11 @@
            bindinput="onInputChange" />
   </view>
 
+  <!-- 价格提示 -->
+  <view class="input-row" style="margin-top: 0;">
+    <text style="font-size:24rpx;color:#888;">到经停点的价格需乘客与司机协商</text>
+  </view>
+
   <!-- 提交 -->
-  <button class="publish-btn" type="primary" bindtap="submitRide">发布顺风车</button>
+  <button class="publish-btn" type="primary" bindtap="submitRide">{{currentSubTab==='driver' ? '发布车找人' : '发布人找车'}}</button>
 </view>

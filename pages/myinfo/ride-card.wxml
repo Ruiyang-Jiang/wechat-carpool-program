@@ -24,6 +24,16 @@
         <text class="bold">{{item.arrival_place.city}}, {{item.arrival_place.state}}</text>
       </view>
 
+      <!-- 途经点显示 -->
+      <view wx:if="{{item.stopovers && item.stopovers.length}}" class="row">
+        <text class="field-label">途经点：</text>
+        <view class="stopovers-display">
+          <block wx:for="{{item.stopovers}}" wx:key="index" wx:for-item="stopover">
+            <text class="stopover-tag">{{stopover.city}}{{stopover.state ? ', ' + stopover.state : ''}}</text>
+          </block>
+        </view>
+      </view>
+
       <!-- ------- 找乘客 (ride) ------- -->
       <block wx:if="{{item.type === 'ride'}}">
         <view class="row">

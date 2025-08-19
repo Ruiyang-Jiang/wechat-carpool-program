@@ -6,7 +6,8 @@
     "pages/list/list",
     "pages/myinfo/myinfo",
     "pages/publish/publish",
-    "pages/detail/detail"
+    "pages/detail/detail",
+    "cloud/getCitites"
   ],
   "window": {
     "navigationBarTextStyle": "black",

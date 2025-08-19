@@ -1,7 +1,7 @@
 {
-  "name": "submitFeedback",
+  "name": "cleanupExpiredRides",
   "version": "1.0.0",
-  "description": "提交反馈云函数",
+  "description": "清理过期顺风车云函数",
   "main": "index.js",
   "dependencies": {
     "wx-server-sdk": "latest"

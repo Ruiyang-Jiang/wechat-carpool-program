@@ -44,6 +44,10 @@
   background:#f7f7f7;
   border:1rpx solid #e0e0e0;
   border-radius:12rpx;
+  box-sizing:border-box;
+  min-height:80rpx;
+  word-break:break-all;
+  white-space:pre-wrap;
 }
 
 /* picker = input style */
@@ -82,3 +86,201 @@
 }
 .suggest-item + .suggest-item{ border-top:1rpx solid #f3f3f3; }
 .suggest-item:active{ background:#f2fdf4; }
+
+/* 途经点样式 */
+.stopover-section{
+  margin-top:20rpx;
+  padding-top:20rpx;
+  border-top:1rpx solid #f0f0f0;
+}
+
+.add-stopover-btn{
+  background:#f0f8ff;
+  color:#007aff;
+  border:1rpx solid #007aff;
+  border-radius:8rpx;
+  font-size:24rpx;
+  padding:8rpx 16rpx;
+}
+
+.stopover-input-section{
+  margin-top:16rpx;
+}
+
+.stopover-list{
+  margin-top:16rpx;
+}
+
+.stopover-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12rpx 16rpx;
+  margin:8rpx 0;
+  background:#f8f9fa;
+  border-radius:8rpx;
+  border:1rpx solid #e9ecef;
+}
+
+.stopover-text{
+  font-size:28rpx;
+  color:#333;
+}
+
+.remove-btn{
+  background:#ff4757;
+  color:#fff;
+  border-radius:6rpx;
+  font-size:22rpx;
+  padding:6rpx 12rpx;
+}
+
+/* 路线显示样式 */
+.route-section{
+  margin:20rpx 0;
+  padding:20rpx;
+  background:#f8f9fa;
+  border-radius:12rpx;
+  border:1rpx solid #e9ecef;
+}
+
+.route-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16rpx;
+}
+
+.route-title{
+  font-size:28rpx;
+  font-weight:600;
+  color:#333;
+}
+
+.add-stopover-btn-inline{
+  background:#007aff;
+  color:#fff;
+  border-radius:16rpx;
+  font-size:22rpx;
+  padding:6rpx 12rpx;
+}
+
+.route-display{
+  position:relative;
+}
+
+.route-point{
+  display:flex;
+  align-items:center;
+  padding:12rpx 0;
+  position:relative;
+}
+
+.point-icon{
+  font-size:32rpx;
+  margin-right:12rpx;
+  width:40rpx;
+  text-align:center;
+}
+
+.point-content{
+  flex:1;
+}
+
+.point-label{
+  display:block;
+  font-size:22rpx;
+  color:#666;
+  margin-bottom:4rpx;
+}
+
+.point-city{
+  font-size:26rpx;
+  color:#333;
+  font-weight:500;
+}
+
+.route-connector{
+  width:2rpx;
+  height:20rpx;
+  background:#ddd;
+  margin-left:20rpx;
+}
+
+.remove-point-btn{
+  background:#ff4757;
+  color:#fff;
+  border-radius:50%;
+  width:40rpx;
+  height:40rpx;
+  font-size:20rpx;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-left:12rpx;
+}
+
+/* 经停点输入弹窗 */
+.stopover-input-overlay{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.5);
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.stopover-input-modal{
+  background:#fff;
+  margin:40rpx;
+  border-radius:16rpx;
+  padding:30rpx;
+  max-height:60vh;
+  overflow-y:auto;
+  min-width:80vw;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20rpx;
+  font-size:30rpx;
+  font-weight:600;
+}
+
+.close-btn{
+  background:none;
+  border:none;
+  font-size:40rpx;
+  color:#999;
+  padding:0;
+  margin:0;
+  width:40rpx;
+  height:40rpx;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.stopover-input{
+  width:100%;
+  padding:16rpx 20rpx;
+  font-size:28rpx;
+  background:#f7f7f7;
+  border:1rpx solid #e0e0e0;
+  border-radius:12rpx;
+  margin-bottom:16rpx;
+}
+
+.publish-btn{
+  margin-top:40rpx;
+  background:#07c160;
+  color:#fff;
+  border-radius:12rpx;
+  font-size:32rpx;
+}

@@ -1,0 +1,9 @@
+{
+  "name": "databaseMigration",
+  "version": "1.0.0",
+  "description": "数据库迁移云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

@@ -16,7 +16,8 @@ exports.main = async (event) => {
     departure_place, arrival_place,
     departure_date, departure_time = '',
     price = 0, passenger_number = 1,
-    contact_wechat = ''
+    contact_wechat = '',
+    stopovers = []
   } = event
 
   if (!departure_place?.city)          return { ok:false, msg:'缺少出发地' }
@@ -45,13 +46,15 @@ exports.main = async (event) => {
 
       departure_place,
       arrival_place,
+      stopovers: Array.isArray(stopovers) ? stopovers : [],
       departure_date,
       departure_time,
 
       price: Number(price) || 0,
       passenger_number,
       empty_seats: 0,
-      passengers: [],
+      passengers: [],            // 兼容字段（保留）
+      participants: [],          // 新增：同行乘客列表（{ openid, join_time }）
 
       contact_wechat,
       created_at: db.serverDate(),

@@ -1,7 +1,7 @@
 {
-  "name": "submitFeedback",
+  "name": "joinRequest",
   "version": "1.0.0",
-  "description": "提交反馈云函数",
+  "description": "加入请求云函数",
   "main": "index.js",
   "dependencies": {
     "wx-server-sdk": "latest"
