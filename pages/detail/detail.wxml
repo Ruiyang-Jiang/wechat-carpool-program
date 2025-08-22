@@ -69,11 +69,7 @@
   <!-- ======= 发布者信息 ======= -->
   <view class="publisher-card">
     <view class="publisher-row">
-      <text>发布者：</text>
-      <text class="bold">{{publisherInfo.nickName || '用户'}}</text>
-    </view>
-    <view class="publisher-row">
-      <text>联系微信：</text>
+      <text>发布者微信：</text>
       <text class="bold">{{publisherInfo.wechat || '未提供'}}</text>
       <button type="primary" size="mini" bindtap="handleCopyWeChat" wx:if="{{publisherInfo.wechat}}">复制</button>
     </view>
