@@ -4,6 +4,17 @@
   <view class="tab {{currentView==='driver'?'active':''}}"    bindtap="gotoFindDriver">找司机</view>
 </view>
 
+<!-- 页面提示信息 -->
+<view class="page-tip">
+  <view class="tip-icon">ℹ️</view>
+  <view class="tip-content">
+    <view class="tip-text" wx:if="{{currentView==='passenger'}}">目前显示为最近一周的车找人</view>
+    <view class="tip-text" wx:if="{{currentView==='driver'}}">目前显示为最近一周的人找车</view>
+    <view class="tip-subtext">请通过首页搜索来寻找特定的需求</view>
+  </view>
+</view>
+<button class="refresh-btn" bindtap="refreshData">刷新</button>
+
 <!-- ========================== 找乘客 ========================== -->
 <block wx:if="{{currentView==='passenger'}}">
 
@@ -41,49 +52,59 @@
     </view>
 
     <!-- ---------- 卡片列表 ---------- -->
-    <block wx:for="{{passengerData}}" wx:key="_id">
-      <view class="ride-card {{item.isPast?'past':''}}" data-id="{{item._id}}" data-type="{{item.type}}"
-            bindtap="chooseItem">
-        <!-- header -->
-        <view class="ride-header">
-          <text class="badge badge-driver">{{item.displayType}}</text>
-          <text wx:if="{{item.matchLabel}}" class="match-badge">{{item.matchLabel}}</text>
-          <text class="ride-date {{item.isPast?'date-past':''}}">
-            {{item.departure_date}} {{item.departure_time||'00:00'}}
-          </text>
-          <text wx:if="{{item.isPast}}" class="expired-badge">已过期</text>
-        </view>
-
-        <!-- body -->
-        <view class="ride-body">
-          <view class="row">
-            <text>出发地：</text><text class="bold">{{item.departure_place.city}}, {{item.departure_place.state}}</text>
-          </view>
-          <view class="row">
-            <text>目的地：</text><text class="bold">{{item.arrival_place.city}}, {{item.arrival_place.state}}</text>
+    <block wx:if="{{passengerData.length > 0}}">
+      <block wx:for="{{passengerData}}" wx:key="_id">
+        <view class="ride-card {{item.isPast?'past':''}}" data-id="{{item._id}}" data-type="{{item.type}}"
+              bindtap="chooseItem">
+          <!-- header -->
+          <view class="ride-header">
+            <text class="badge badge-driver">{{item.displayType}}</text>
+            <text wx:if="{{item.matchLabel}}" class="match-badge">{{item.matchLabel}}</text>
+            <text class="ride-date {{item.isPast?'date-past':''}}">
+              {{item.departure_date}} {{item.departure_time||'00:00'}}
+            </text>
+            <text wx:if="{{item.isPast}}" class="expired-badge">已过期</text>
           </view>
 
-          <!-- 途经点显示 -->
-          <view wx:if="{{item.stopovers && item.stopovers.length}}" class="stopovers-row">
-            <text class="stopovers-label">途经：</text>
-            <view class="stopovers-list">
-              <block wx:for="{{item.stopovers}}" wx:key="index" wx:for-item="stopover">
-                <text class="stopover-item">{{stopover.city}}{{stopover.state ? ', ' + stopover.state : ''}}</text>
-              </block>
+          <!-- body -->
+          <view class="ride-body">
+            <view class="row">
+              <text>出发地：</text><text class="bold">{{item.departure_place.city}}, {{item.departure_place.state}}</text>
+            </view>
+            <view class="row">
+              <text>目的地：</text><text class="bold">{{item.arrival_place.city}}, {{item.arrival_place.state}}</text>
+            </view>
+
+            <!-- 途经点显示 -->
+            <view wx:if="{{item.stopovers && item.stopovers.length}}" class="stopovers-row">
+              <text class="stopovers-label">途经：</text>
+              <view class="stopovers-list">
+                <block wx:for="{{item.stopovers}}" wx:key="index" wx:for-item="stopover">
+                  <text class="stopover-item">{{stopover.city}}{{stopover.state ? ', ' + stopover.state : ''}}</text>
+                </block>
+              </view>
+            </view>
+            <view class="row">
+              <text>空余座位：</text><text class="bold">{{item.empty_seats}}</text>
+            </view>
+            <view class="row">
+              <text>价格：</text><text class="bold">{{item.price}}/人</text>
+            </view>
+            <view class="row">
+              <text style="font-size:22rpx;color:#999;">到经停点价格需与司机协商</text>
             </view>
           </view>
-          <view class="row">
-            <text>空余座位：</text><text class="bold">{{item.empty_seats}}</text>
-          </view>
-          <view class="row">
-            <text>价格：</text><text class="bold">{{item.price}}</text>
-          </view>
-          <view class="row">
-            <text style="font-size:22rpx;color:#999;">到经停点价格需与司机协商</text>
-          </view>
         </view>
-      </view>
+      </block>
     </block>
+    
+    <!-- 无结果提示 -->
+    <view wx:elif="{{!showPassengerSearchPrompt && passengerData.length === 0}}" class="no-result">
+      <view class="no-result-icon">🔍</view>
+      <view class="no-result-text">没有找到相关的顺风车</view>
+      <view class="no-result-subtext">请尝试调整搜索条件或重新搜索</view>
+      <button class="retry-btn" bindtap="retrySearch">重新搜索</button>
+    </view>
   </block>
 </block>
 
@@ -122,59 +143,69 @@
     </view>
 
     <!-- ---------- 卡片列表 ---------- -->
-    <block wx:for="{{driverData}}" wx:key="_id">
-      <view class="ride-card {{item.isPast?'past':''}}" data-id="{{item._id}}" data-type="{{item.type}}"
-            bindtap="chooseItem">
-        <view class="ride-header">
-          <text class="badge badge-passenger">{{item.displayType}}</text>
-          <text wx:if="{{item.matchLabel}}" class="match-badge">{{item.matchLabel}}</text>
-          <text class="ride-date {{item.isPast?'date-past':''}}">
-            {{item.departure_date}} {{item.departure_time||'00:00'}}
-          </text>
-          <text wx:if="{{item.isPast}}" class="expired-badge">已过期</text>
-        </view>
+    <block wx:if="{{driverData.length > 0}}">
+      <block wx:for="{{driverData}}" wx:key="_id">
+        <view class="ride-card {{item.isPast?'past':''}}" data-id="{{item._id}}" data-type="{{item.type}}"
+              bindtap="chooseItem">
+          <view class="ride-header">
+            <text class="badge badge-passenger">{{item.displayType}}</text>
+            <text wx:if="{{item.matchLabel}}" class="match-badge">{{item.matchLabel}}</text>
+            <text class="ride-date {{item.isPast?'date-past':''}}">
+              {{item.departure_date}} {{item.departure_time||'00:00'}}
+            </text>
+            <text wx:if="{{item.isPast}}" class="expired-badge">已过期</text>
+          </view>
 
-        <view class="ride-body">
-          <view class="row">
-            <text>出发地：</text><text class="bold">{{item.departure_place.city}}, {{item.departure_place.state}}</text>
-          </view>
-          <view class="row">
-            <text>目的地：</text><text class="bold">{{item.arrival_place.city}}, {{item.arrival_place.state}}</text>
-          </view>
-          <!-- 途经点显示（请求也可包含） -->
-          <view wx:if="{{item.stopovers && item.stopovers.length}}" class="stopovers-row">
-            <text class="stopovers-label">途经：</text>
-            <view class="stopovers-list">
-              <block wx:for="{{item.stopovers}}" wx:key="index" wx:for-item="stopover">
-                <text class="stopover-item">{{stopover.city}}</text>
-              </block>
+          <view class="ride-body">
+            <view class="row">
+              <text>出发地：</text><text class="bold">{{item.departure_place.city}}, {{item.departure_place.state}}</text>
+            </view>
+            <view class="row">
+              <text>目的地：</text><text class="bold">{{item.arrival_place.city}}, {{item.arrival_place.state}}</text>
+            </view>
+            <!-- 途经点显示（请求也可包含） -->
+            <view wx:if="{{item.stopovers && item.stopovers.length}}" class="stopovers-row">
+              <text class="stopovers-label">途经：</text>
+              <view class="stopovers-list">
+                <block wx:for="{{item.stopovers}}" wx:key="index" wx:for-item="stopover">
+                  <text class="stopover-item">{{stopover.city}}</text>
+                </block>
+              </view>
+            </view>
+            <view class="row">
+              <text>乘坐人数：</text><text class="bold">{{item.passenger_number}}</text>
+            </view>
+            <view class="row">
+              <text>期望价格：</text><text class="bold">{{item.price}}/人</text>
+            </view>
+            
+            <!-- Join按钮区域 -->
+            <view class="join-actions" catchtap="handleStopPropagation">
+              <!-- 自己发布的请求 -->
+              <button wx:if="{{item.isOwnRequest}}" class="join-btn disabled" disabled>
+                我的请求
+              </button>
+              <!-- 他人发布的请求 - 未加入 -->
+              <button wx:elif="{{!item.hasJoined}}" class="join-btn primary" 
+                      data-id="{{item._id}}" bindtap="joinRequest">
+                加入请求
+              </button>
+              <!-- 他人发布的请求 - 已加入 -->
+              <button wx:else class="join-btn joined" disabled>
+                已加入
+              </button>
             </view>
           </view>
-          <view class="row">
-            <text>乘坐人数：</text><text class="bold">{{item.passenger_number}}</text>
-          </view>
-          <view class="row">
-            <text>期望价格：</text><text class="bold">{{item.price}}</text>
-          </view>
-          
-          <!-- Join按钮区域 -->
-          <view class="join-actions" catchtap="handleStopPropagation">
-            <!-- 自己发布的请求 -->
-            <button wx:if="{{item.isOwnRequest}}" class="join-btn disabled" disabled>
-              我的请求
-            </button>
-            <!-- 他人发布的请求 - 未加入 -->
-            <button wx:elif="{{!item.hasJoined}}" class="join-btn primary" 
-                    data-id="{{item._id}}" bindtap="joinRequest">
-              加入请求
-            </button>
-            <!-- 他人发布的请求 - 已加入 -->
-            <button wx:else class="join-btn joined" disabled>
-              已加入
-            </button>
-          </view>
         </view>
-      </view>
+      </block>
     </block>
+    
+    <!-- 无结果提示 -->
+    <view wx:elif="{{!showDriverSearchPrompt && driverData.length === 0}}" class="no-result">
+      <view class="no-result-icon">🔍</view>
+      <view class="no-result-text">没有找到相关的乘客需求</view>
+      <view class="no-result-subtext">请尝试调整搜索条件或重新搜索</view>
+      <button class="retry-btn" bindtap="retrySearch">重新搜索</button>
+    </view>
   </block>
 </block>

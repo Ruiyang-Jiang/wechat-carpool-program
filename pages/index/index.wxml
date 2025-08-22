@@ -1,6 +1,6 @@
 <!-- ======= 顶部 Tab ======= -->
 <view class="tabs">
-  <view class="tab {{activeTab==='rides'?'active':''}}" data-tab="rides"  bindtap="switchTab">车找人</view>
+  <view class="tab {{activeTab==='rides'?'active':''}}" data-tab="rides" bindtap="switchTab">车找人</view>
   <view class="tab {{activeTab==='people'?'active':''}}" data-tab="people" bindtap="switchTab">人找车</view>
 </view>
 
@@ -9,13 +9,15 @@
 <!-- ========================================================= -->
 <block wx:if="{{activeTab==='rides'}}">
   <view class="form-card">
+    <p class="prompt">请输入出发城市&目的城市并从建议框中选择地址</p>
     <!-- 出发城市 -->
     <view class="input-row">
       <text class="label">出发城市</text>
       <input class="input"
              placeholder="输入出发城市"
-             value="{{departure_place.city}}"
-             bindinput="onDepartureInput" />
+             value="{{departureQuery}}"
+             bindinput="onDepartureInput"
+             bindblur="onDepartureBlur" />
     </view>
     <!-- 下拉建议 -->
     <view class="suggestion-list" wx:if="{{departureSuggestions.length}}">
@@ -33,8 +35,9 @@
       <text class="label">目的城市</text>
       <input class="input"
              placeholder="输入目的城市"
-             value="{{arrival_place.city}}"
-             bindinput="onArrivalInput" />
+             value="{{arrivalQuery}}"
+             bindinput="onArrivalInput"
+             bindblur="onArrivalBlur" />
     </view>
     <!-- 下拉建议 -->
     <view class="suggestion-list" wx:if="{{arrivalSuggestions.length}}">
@@ -70,13 +73,15 @@
 <!-- ========================================================= -->
 <block wx:elif="{{activeTab==='people'}}">
   <view class="form-card">
+    <p class="prompt">请输入出发城市&目的城市并从建议框中选择地址</p>
     <!-- 出发城市 -->
     <view class="input-row">
       <text class="label">出发城市</text>
       <input class="input"
              placeholder="输入出发城市"
-             value="{{search2Departure.city}}"
-             bindinput="onDeparture2Input" />
+             value="{{departure2Query}}"
+             bindinput="onDeparture2Input"
+             bindblur="onDeparture2Blur" />
     </view>
     <view class="suggestion-list" wx:if="{{departure2Suggestions.length}}">
       <block wx:for="{{departure2Suggestions}}" wx:key="city">
@@ -93,8 +98,9 @@
       <text class="label">目的城市</text>
       <input class="input"
              placeholder="输入目的城市"
-             value="{{search2Destination.city}}"
-             bindinput="onDestination2Input" />
+             value="{{destination2Query}}"
+             bindinput="onDestination2Input"
+             bindblur="onDestination2Blur" />
     </view>
     <view class="suggestion-list" wx:if="{{destination2Suggestions.length}}">
       <block wx:for="{{destination2Suggestions}}" wx:key="city">
@@ -120,6 +126,6 @@
     </view>
 
     <!-- 搜索按钮 -->
-    <button class="search-btn" type="primary" bindtap="searchPeople">搜索顺风车</button>
+    <button class="search-btn" type="primary" bindtap="searchPeople">搜索乘客</button>
   </view>
 </block>

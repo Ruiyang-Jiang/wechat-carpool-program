@@ -23,8 +23,8 @@ Page({
     currentView: 'passenger',          // passenger | driver
 
     /* 搜索提示开关 */
-    showPassengerSearchPrompt: true,
-    showDriverSearchPrompt:    true,
+    showPassengerSearchPrompt: false,  // 改为false，默认显示数据
+    showDriverSearchPrompt:    false,  // 改为false，默认显示数据
 
     /* 搜索条件与数据 */
     passengerSearch: null,
@@ -56,7 +56,10 @@ Page({
       { label:'从低到高 (ASC)', value:'asc'  },
       { label:'从高到低 (DESC)',value:'desc' }
     ],
-    driverSortOrderIndex: 0
+    driverSortOrderIndex: 0,
+
+    passengerEmpty: false,  // 车找人空态
+    driverEmpty: false,     // 人找车空态
   },
 
   /* ---------------- 生命周期 ---------------- */
@@ -70,13 +73,14 @@ Page({
       passengerSearch,
       driverSearch,
       currentView: storedView,
-      showPassengerSearchPrompt: !passengerSearch,
-      showDriverSearchPrompt:    !driverSearch
+      showPassengerSearchPrompt: false,  // 默认显示数据
+      showDriverSearchPrompt:    false   // 默认显示数据
     }, () => {
+      // 默认加载最近一周的数据
       if (this.data.currentView === 'passenger') {
-        if (!this.data.showPassengerSearchPrompt) this.loadPassengerData()
+        this.loadPassengerData()
       } else {
-        if (!this.data.showDriverSearchPrompt)    this.loadDriverData()
+        this.loadDriverData()
       }
     })
   },
@@ -85,20 +89,18 @@ Page({
   gotoFindPassenger () {
     wx.setStorageSync('currentView', 'passenger')
     this.setData({ currentView: 'passenger' }, () => {
-      if (!this.data.showPassengerSearchPrompt) this.loadPassengerData()
+      this.loadPassengerData()
     })
   },
   gotoFindDriver () {
     wx.setStorageSync('currentView', 'driver')
     this.setData({ currentView: 'driver' }, () => {
-      if (!this.data.showDriverSearchPrompt) this.loadDriverData()
+      this.loadDriverData()
     })
   },
 
   /* ============ 加载「车找人」(ride) ============ */
   loadPassengerData () {
-    if (this.data.showPassengerSearchPrompt) return
-
     // 优先使用搜索结果
     const searchResults = wx.getStorageSync('searchResults')
     if (searchResults && Array.isArray(searchResults)) {
@@ -112,36 +114,38 @@ Page({
 
         return decorated
       })
-      this.setData({ passengerData: sorted })
+      this.setData({ passengerData: sorted, passengerEmpty: sorted.length === 0 })
       // 清除搜索结果缓存
       wx.removeStorageSync('searchResults')
       return
     }
 
-    // 降级到原有查询方式
-    const search = this.data.passengerSearch
+    // 默认加载最近一周的数据
+    this.loadRecentPassengerData()
+  },
+
+  /* ============ 加载最近一周的车找人数据 ============ */
+  loadRecentPassengerData() {
+    const now = new Date()
+    const oneWeekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+    
+    // 格式化日期为 YYYY-MM-DD 格式
+    const today = now.toISOString().split('T')[0]
+    const nextWeek = oneWeekLater.toISOString().split('T')[0]
+
     let query = db.collection('rides').where({
       type: 'ride',
-      status: 'open'
+      status: 'open',
+      departure_date: db.command.gte(today).and(db.command.lte(nextWeek))
     })
-
-    if (search) {
-      query = query.where({
-        'departure_place.city':  search.departure_place.city,
-        'departure_place.state': search.departure_place.state,
-        'arrival_place.city':    search.arrival_place.city,
-        'arrival_place.state':   search.arrival_place.state,
-        departure_date:          search.departure_date
-      })
-    }
 
     query.get()
       .then(res => {
         const sorted = this.sortPassenger(res.data).map(decorate)
-        this.setData({ passengerData: sorted })
+        this.setData({ passengerData: sorted, passengerEmpty: sorted.length === 0 })
       })
       .catch(err => {
-        console.error('查询 rides (ride) 失败', err)
+        console.error('查询最近一周 rides (ride) 失败', err)
         wx.showToast({ title:'加载数据失败', icon:'none' })
       })
   },
@@ -158,8 +162,6 @@ Page({
 
   /* ============ 加载「人找车」(request) ============ */
   loadDriverData () {
-    if (this.data.showDriverSearchPrompt) return
-
     // 优先使用搜索结果
     const searchResults = wx.getStorageSync('searchResults')
     if (searchResults && Array.isArray(searchResults)) {
@@ -172,36 +174,38 @@ Page({
         }
         return decorated
       })
-      this.setData({ driverData: sorted })
+      this.setData({ driverData: sorted, driverEmpty: sorted.length === 0 })
       // 清除搜索结果缓存
       wx.removeStorageSync('searchResults')
       return
     }
 
-    // 降级到原有查询方式
-    const search = this.data.driverSearch
+    // 默认加载最近一周的数据
+    this.loadRecentDriverData()
+  },
+
+  /* ============ 加载最近一周的人找车数据 ============ */
+  loadRecentDriverData() {
+    const now = new Date()
+    const oneWeekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+    
+    // 格式化日期为 YYYY-MM-DD 格式
+    const today = now.toISOString().split('T')[0]
+    const nextWeek = oneWeekLater.toISOString().split('T')[0]
+
     let query = db.collection('rides').where({
       type: 'request',
-      status: 'open'
+      status: 'open',
+      departure_date: db.command.gte(today).and(db.command.lte(nextWeek))
     })
-
-    if (search) {
-      query = query.where({
-        'departure_place.city':  search.departure_place.city,
-        'departure_place.state': search.departure_place.state,
-        'arrival_place.city':    search.arrival_place.city,
-        'arrival_place.state':   search.arrival_place.state,
-        departure_date:          search.departure_date
-      })
-    }
 
     query.get()
       .then(res => {
         const sorted = this.sortDriver(res.data).map(decorate)
-        this.setData({ driverData: sorted })
+        this.setData({ driverData: sorted, driverEmpty: sorted.length === 0 })
       })
       .catch(err => {
-        console.error('查询 rides (request) 失败', err)
+        console.error('查询最近一周 rides (request) 失败', err)
         wx.showToast({ title:'加载数据失败', icon:'none' })
       })
   },
@@ -213,28 +217,32 @@ Page({
     this.setData({
       passengerSearch: null,
       passengerData:   [],
-      showPassengerSearchPrompt: true
+      showPassengerSearchPrompt: false
     })
+    // 重新加载最近一周的数据
+    this.loadPassengerData()
   },
   clearDriverSearch () {
     wx.removeStorageSync('peopleSearch')
     wx.removeStorageSync('currentView')
     this.setData({
       driverSearch: null,
-      driverData:   [],
-      showDriverSearchPrompt: true
+      driverData:      [],
+      showDriverSearchPrompt: false
     })
+    // 重新加载最近一周的数据
+    this.loadDriverData()
   },
 
   /* ---------------- 排序逻辑 ---------------- */
   onPassengerSortFieldChange (e) {
     this.setData({ passengerSortFieldIndex: Number(e.detail.value) }, () => {
-      if (!this.data.showPassengerSearchPrompt) this.loadPassengerData()
+      this.loadPassengerData()
     })
   },
   onPassengerSortOrderChange (e) {
     this.setData({ passengerSortOrderIndex: Number(e.detail.value) }, () => {
-      if (!this.data.showPassengerSearchPrompt) this.loadPassengerData()
+      this.loadPassengerData()
     })
   },
   sortPassenger (data) {
@@ -257,12 +265,12 @@ Page({
 
   onDriverSortFieldChange (e) {
     this.setData({ driverSortFieldIndex: Number(e.detail.value) }, () => {
-      if (!this.data.showDriverSearchPrompt) this.loadDriverData()
+      this.loadDriverData()
     })
   },
   onDriverSortOrderChange (e) {
     this.setData({ driverSortOrderIndex: Number(e.detail.value) }, () => {
-      if (!this.data.showDriverSearchPrompt) this.loadDriverData()
+      this.loadDriverData()
     })
   },
   sortDriver (data) {
@@ -325,5 +333,29 @@ Page({
         wx.showToast({ title: '操作失败', icon: 'none' })
       }
     })
+  },
+
+  /* ---------------- 重新搜索 ---------------- */
+  retrySearch() {
+    // 跳转回首页进行重新搜索
+    wx.switchTab({
+      url: '/pages/index/index'
+    })
+  },
+
+  /* ---------------- 刷新数据 ---------------- */
+  refreshData() {
+    wx.showLoading({ title: '刷新中...', mask: true })
+    
+    if (this.data.currentView === 'passenger') {
+      this.loadPassengerData()
+    } else {
+      this.loadDriverData()
+    }
+    
+    setTimeout(() => {
+      wx.hideLoading()
+      wx.showToast({ title: '刷新完成', icon: 'success' })
+    }, 1000)
   }
 })

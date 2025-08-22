@@ -1,8 +1,5 @@
 {
   "name": "acceptRideRequest",
-  "version": "1.0.0",
-  "description": "接受顺风车请求云函数",
-  "main": "index.js",
   "dependencies": {
     "wx-server-sdk": "latest"
   }

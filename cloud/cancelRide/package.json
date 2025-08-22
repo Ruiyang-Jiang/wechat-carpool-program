@@ -1,9 +1,0 @@
-{
-  "name": "cancelRide",
-  "version": "1.0.0",
-  "description": "取消顺风车云函数",
-  "main": "index.js",
-  "dependencies": {
-    "wx-server-sdk": "latest"
-  }
-}

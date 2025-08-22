@@ -1,9 +1,1 @@
-{
-  "name": "updateRide",
-  "version": "1.0.0",
-  "description": "更新顺风车信息云函数",
-  "main": "index.js",
-  "dependencies": {
-    "wx-server-sdk": "latest"
-  }
-}
+{ "dependencies": { "wx-server-sdk": "latest" } }
