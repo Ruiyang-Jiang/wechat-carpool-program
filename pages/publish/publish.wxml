@@ -175,7 +175,7 @@
 
   <!-- 公共字段：价格/人 & 微信号 -->
   <view class="input-row">
-    <text class="label">价格 / 人</text>
+    <text class="label">价格 $/ 人</text>
     <input class="input"
            type="number"
            placeholder="必填"

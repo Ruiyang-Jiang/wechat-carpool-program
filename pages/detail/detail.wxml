@@ -57,7 +57,7 @@
 
       <!-- 共用字段：价格 -->
       <view class="row">
-        <text>价格：</text><text class="bold">{{detail.price}}</text>
+        <text>价格：$</text><text class="bold">{{detail.price}}</text>
       </view>
       <view class="row">
         <text style="font-size:22rpx;color:#999;">到经停点价格需与司机协商</text>

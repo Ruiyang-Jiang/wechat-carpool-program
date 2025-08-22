@@ -72,7 +72,7 @@
 
       <!-- 共用：价格 -->
       <view class="row">
-        <text class="field-label">价格：</text>
+        <text class="field-label">价格：$</text>
 
         <input wx:if="{{currentTab === 'mine' || currentTab === 'driver'}}"
                class="edit-input"

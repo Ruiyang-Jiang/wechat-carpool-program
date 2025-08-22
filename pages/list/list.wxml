@@ -88,7 +88,7 @@
               <text>空余座位：</text><text class="bold">{{item.empty_seats}}</text>
             </view>
             <view class="row">
-              <text>价格：</text><text class="bold">{{item.price}}/人</text>
+              <text>价格：$</text><text class="bold">{{item.price}}/人</text>
             </view>
             <view class="row">
               <text style="font-size:22rpx;color:#999;">到经停点价格需与司机协商</text>
@@ -176,7 +176,7 @@
               <text>乘坐人数：</text><text class="bold">{{item.passenger_number}}</text>
             </view>
             <view class="row">
-              <text>期望价格：</text><text class="bold">{{item.price}}/人</text>
+              <text>期望价格：$</text><text class="bold">{{item.price}}/人</text>
             </view>
             
             <!-- Join按钮区域 -->
