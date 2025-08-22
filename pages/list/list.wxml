@@ -90,7 +90,8 @@
             <view class="row">
               <text>价格：$</text><text class="bold">{{item.price}}/人</text>
             </view>
-            <view class="row">
+            <!-- 经停点价格提示 -->
+            <view wx:if="{{item.stopovers && item.stopovers.length}}" class="row">
               <text style="font-size:22rpx;color:#999;">到经停点价格需与司机协商</text>
             </view>
           </view>
@@ -177,6 +178,11 @@
             </view>
             <view class="row">
               <text>期望价格：$</text><text class="bold">{{item.price}}/人</text>
+            </view>
+            
+            <!-- 经停点价格提示 -->
+            <view wx:if="{{item.stopovers && item.stopovers.length}}" class="row">
+              <text style="font-size:22rpx;color:#999;">到经停点价格需与司机协商</text>
             </view>
             
             <!-- Join按钮区域 -->

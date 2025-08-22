@@ -59,7 +59,8 @@
       <view class="row">
         <text>价格：$</text><text class="bold">{{detail.price}}</text>
       </view>
-      <view class="row">
+      <!-- 经停点价格提示 -->
+      <view wx:if="{{detail.stopovers && detail.stopovers.length}}" class="row">
         <text style="font-size:22rpx;color:#999;">到经停点价格需与司机协商</text>
       </view>
     </view>
