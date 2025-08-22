@@ -75,12 +75,11 @@
     </view>
     <!-- 仅对请求展示参与者联系方式列表 -->
     <view wx:if="{{detail.type==='request' && participantsInfo && participantsInfo.length}}" style="margin-top:12rpx;">
-      <view class="publisher-row"><text class="bold">参与者微信：</text></view>
       <block wx:for="{{participantsInfo}}" wx:key="openid">
         <view class="publisher-row">
-          <text>{{item.nickName || '乘客'}}</text>
+          <text>{{item.nickName || '参与者乘客微信:'}}</text>
           <text class="bold" style="margin-left:8rpx;">{{item.wechat || '未提供'}}</text>
-          <button wx:if="{{item.wechat}}" type="default" size="mini" data-wxid="{{item.wechat}}" bindtap="copyParticipantWeChat">复制</button>
+          <button wx:if="{{item.wechat}}" type="primary" size="mini" data-wxid="{{item.wechat}}" bindtap="copyParticipantWeChat">复制</button>
         </view>
       </block>
     </view>
