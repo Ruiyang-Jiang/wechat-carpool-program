@@ -40,7 +40,7 @@ Page({
 
   /* ========== 车找人：出发地输入/选择/失焦 ========== */
   onDepartureInput(e) {
-    const value = (e.detail.value || '').trim();
+    const value = e.detail.value || '';
     this.setData({ departureQuery: value });
 
     if (!value) return this.setData({ departureSuggestions: [] });
@@ -73,7 +73,7 @@ Page({
 
   /* ========== 车找人：目的地输入/选择/失焦 ========== */
   onArrivalInput(e) {
-    const value = (e.detail.value || '').trim();
+    const value = e.detail.value || '';
     this.setData({ arrivalQuery: value });
 
     if (!value) return this.setData({ arrivalSuggestions: [] });
@@ -103,7 +103,7 @@ Page({
 
   /* ========== 人找车：出发地输入/选择/失焦 ========== */
   onDeparture2Input(e) {
-    const value = (e.detail.value || '').trim();
+    const value = e.detail.value || '';
     this.setData({ departure2Query: value });
 
     if (!value) return this.setData({ departure2Suggestions: [] });
@@ -133,7 +133,7 @@ Page({
 
   /* ========== 人找车：目的地输入/选择/失焦 ========== */
   onDestination2Input(e) {
-    const value = (e.detail.value || '').trim();
+    const value = e.detail.value || '';
     this.setData({ destination2Query: value });
 
     if (!value) return this.setData({ destination2Suggestions: [] });
