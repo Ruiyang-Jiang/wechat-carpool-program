@@ -1,7 +1,7 @@
 <!-- ======= 顶部 Tab ======= -->
 <view class="tabs">
-  <view class="tab {{activeTab==='rides'?'active':''}}" data-tab="rides" bindtap="switchTab">车找人</view>
-  <view class="tab {{activeTab==='people'?'active':''}}" data-tab="people" bindtap="switchTab">人找车</view>
+  <view class="tab {{activeTab==='rides'?'active':''}}" data-tab="rides" bindtap="switchTab">找乘客</view>
+  <view class="tab {{activeTab==='people'?'active':''}}" data-tab="people" bindtap="switchTab">找司机</view>
 </view>
 
 <!-- ========================================================= -->

@@ -5,7 +5,7 @@
 </view>
 
 <!-- 页面提示信息 -->
-<view class="page-tip" wx:if="{{!hasExactMatchResults}}">
+<view class="page-tip" wx:if="{{!hasExactMatchResults && shouldShowPageTip}}">
   <view class="tip-icon">ℹ️</view>
   <view class="tip-content">
     <view class="tip-text" wx:if="{{currentView==='passenger'}}">目前显示为最近一周的车找人</view>
@@ -13,7 +13,7 @@
     <view class="tip-subtext">请通过首页搜索来寻找特定的需求</view>
   </view>
 </view>
-<button class="refresh-btn" bindtap="refreshData" wx:if="{{!hasExactMatchResults}}">刷新</button>
+<button class="refresh-btn" bindtap="refreshData" wx:if="{{!hasExactMatchResults && shouldShowPageTip}}">刷新</button>
 
 <!-- ========================== 找乘客 ========================== -->
 <block wx:if="{{currentView==='passenger'}}">

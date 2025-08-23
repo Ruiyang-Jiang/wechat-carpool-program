@@ -35,6 +35,9 @@ Page({
     /* 是否有精确匹配的搜索结果 */
     hasExactMatchResults: false,
 
+    /* 是否应该显示页面提示信息 */
+    shouldShowPageTip: true,
+
     /* 排序选项 —— 找乘客 */
     passengerSortFields: [
       { label:'日期 & 出发时间', value:'departure_date_time' },
@@ -78,7 +81,8 @@ Page({
       currentView: storedView,
       showPassengerSearchPrompt: false,  // 默认显示数据
       showDriverSearchPrompt:    false,   // 默认显示数据
-      hasExactMatchResults: false  // 重置精确匹配状态
+      hasExactMatchResults: false,  // 重置精确匹配状态
+      shouldShowPageTip: true  // 重置页面提示状态
     }, () => {
       // 默认加载最近一周的数据
       if (this.data.currentView === 'passenger') {
@@ -124,7 +128,8 @@ Page({
       this.setData({ 
         passengerData: sorted, 
         passengerEmpty: sorted.length === 0,
-        hasExactMatchResults: hasExactMatch
+        hasExactMatchResults: hasExactMatch,
+        shouldShowPageTip: sorted.length > 0  // 有搜索结果时不显示页面提示
       })
       
       // 清除搜索结果缓存
@@ -133,7 +138,7 @@ Page({
     }
 
     // 默认加载最近一周的数据
-    this.setData({ hasExactMatchResults: false })
+    this.setData({ hasExactMatchResults: false, shouldShowPageTip: true })
     this.loadRecentPassengerData()
   },
 
@@ -193,7 +198,8 @@ Page({
       this.setData({ 
         driverData: sorted, 
         driverEmpty: sorted.length === 0,
-        hasExactMatchResults: hasExactMatch
+        hasExactMatchResults: hasExactMatch,
+        shouldShowPageTip: sorted.length > 0  // 有搜索结果时不显示页面提示
       })
       
       // 清除搜索结果缓存
@@ -202,7 +208,7 @@ Page({
     }
 
     // 默认加载最近一周的数据
-    this.setData({ hasExactMatchResults: false })
+    this.setData({ hasExactMatchResults: false, shouldShowPageTip: true })
     this.loadRecentDriverData()
   },
 
@@ -240,7 +246,8 @@ Page({
       passengerSearch: null,
       passengerData:   [],
       showPassengerSearchPrompt: false,
-      hasExactMatchResults: false
+      hasExactMatchResults: false,
+      shouldShowPageTip: true
     })
     // 重新加载最近一周的数据
     this.loadPassengerData()
@@ -252,7 +259,8 @@ Page({
       driverSearch: null,
       driverData:      [],
       showDriverSearchPrompt: false,
-      hasExactMatchResults: false
+      hasExactMatchResults: false,
+      shouldShowPageTip: true
     })
     // 重新加载最近一周的数据
     this.loadDriverData()
