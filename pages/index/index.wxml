@@ -68,10 +68,16 @@
   </view>
 </block>
 
+<!-- ======= 页脚隐私协议入口 ======= -->
+<view class="privacy-footer">
+  <button class="privacy-btn" size="mini" bindtap="openPrivacy">查看隐私协议</button>
+  <text class="privacy-hint">我们重视您的隐私与数据安全</text>
+  
+</view>
 <!-- ========================================================= -->
 <!-- ===================== 人 找 车 =========================== -->
 <!-- ========================================================= -->
-<block wx:elif="{{activeTab==='people'}}">
+<block wx:if="{{activeTab==='people'}}">
   <view class="form-card">
     <p class="prompt">请输入出发城市&目的城市并从建议框中选择地址</p>
     <!-- 出发城市 -->

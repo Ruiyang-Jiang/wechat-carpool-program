@@ -34,6 +34,7 @@ Page({
 
     /* 是否有精确匹配的搜索结果 */
     hasExactMatchResults: false,
+    hasStopoverMatch: false,
 
     /* 是否应该显示页面提示信息 */
     shouldShowPageTip: true,
@@ -82,6 +83,7 @@ Page({
       showPassengerSearchPrompt: false,  // 默认显示数据
       showDriverSearchPrompt:    false,   // 默认显示数据
       hasExactMatchResults: false,  // 重置精确匹配状态
+      hasStopoverMatch: false,
       shouldShowPageTip: true  // 重置页面提示状态
     }, () => {
       // 默认加载最近一周的数据
@@ -111,7 +113,7 @@ Page({
   loadPassengerData () {
     // 优先使用搜索结果
     const searchResults = wx.getStorageSync('searchResults')
-    if (searchResults && Array.isArray(searchResults)) {
+    if (searchResults && Array.isArray(searchResults) && searchResults.length && searchResults[0].type === 'ride') {
       const sorted = this.sortPassenger(searchResults).map(item => {
         const decorated = decorate(item)
         // 添加匹配类型标识
@@ -125,20 +127,22 @@ Page({
       
       // 检查是否有精确匹配的结果
       const hasExactMatch = sorted.some(item => item.matchType === 'exact')
+      const hasStopoverMatch = sorted.some(item => item.matchType === 'stopover')
       this.setData({ 
         passengerData: sorted, 
         passengerEmpty: sorted.length === 0,
         hasExactMatchResults: hasExactMatch,
-        shouldShowPageTip: sorted.length > 0  // 有搜索结果时不显示页面提示
+        hasStopoverMatch: hasStopoverMatch,
+        shouldShowPageTip: false  // 有搜索结果（含途经点匹配）不显示页面提示
       })
       
       // 清除搜索结果缓存
-      wx.removeStorageSync('searchResults')
+      // 保留搜索结果以便返回时继续显示
       return
     }
 
     // 默认加载最近一周的数据
-    this.setData({ hasExactMatchResults: false, shouldShowPageTip: true })
+    this.setData({ hasExactMatchResults: false, hasStopoverMatch: false, shouldShowPageTip: true })
     this.loadRecentPassengerData()
   },
 
@@ -182,7 +186,7 @@ Page({
   loadDriverData () {
     // 优先使用搜索结果
     const searchResults = wx.getStorageSync('searchResults')
-    if (searchResults && Array.isArray(searchResults)) {
+    if (searchResults && Array.isArray(searchResults) && searchResults.length && searchResults[0].type === 'request') {
       const sorted = this.sortDriver(searchResults).map(item => {
         const decorated = decorate(item)
         // 添加匹配类型标识
@@ -195,20 +199,22 @@ Page({
       
       // 检查是否有精确匹配的结果
       const hasExactMatch = sorted.some(item => item.matchType === 'exact')
+      const hasStopoverMatch = sorted.some(item => item.matchType === 'stopover')
       this.setData({ 
         driverData: sorted, 
         driverEmpty: sorted.length === 0,
         hasExactMatchResults: hasExactMatch,
-        shouldShowPageTip: sorted.length > 0  // 有搜索结果时不显示页面提示
+        hasStopoverMatch: hasStopoverMatch,
+        shouldShowPageTip: false  // 有搜索结果（含途经点匹配）不显示页面提示
       })
       
       // 清除搜索结果缓存
-      wx.removeStorageSync('searchResults')
+      // 保留搜索结果以便返回时继续显示
       return
     }
 
     // 默认加载最近一周的数据
-    this.setData({ hasExactMatchResults: false, shouldShowPageTip: true })
+    this.setData({ hasExactMatchResults: false, hasStopoverMatch: false, shouldShowPageTip: true })
     this.loadRecentDriverData()
   },
 

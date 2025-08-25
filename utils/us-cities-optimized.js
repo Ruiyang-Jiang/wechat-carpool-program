@@ -1,6 +1,15 @@
 // 优化的城市搜索模块
 const { usCities } = require('./us-cities.js')
 
+// 预热函数：确保大列表在冷启动时被加载到内存
+function primeCities() {
+  try {
+    // 访问一次长度，触发惰性加载（若有）
+    void usCities.length
+  } catch (_) {}
+  return Promise.resolve(true)
+}
+
 function searchCities(keyword) {
   if (!keyword) return [];
 
@@ -37,6 +46,7 @@ function validateCity(cityName) {
 }
 
 module.exports = {
+  primeCities,
   searchCities,
   validateCity
 };

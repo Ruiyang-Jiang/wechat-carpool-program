@@ -11,6 +11,13 @@ Page({
    */
   onLoad() {
     this.checkLoginStatus();
+    
+    // 2秒后自动跳转到首页（如果用户没有主动登录）
+    setTimeout(() => {
+      if (!this.data.loggedIn) {
+        wx.switchTab({ url: "/pages/index/index" });
+      }
+    }, 2000);
   },
 
   /**

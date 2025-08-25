@@ -13,23 +13,45 @@ App({
       env: "carpool-0gazzzn11db221a4",
       traceUser:true,
     });
-    // 登录
+
+    // 可选：调用 wx.login 获取临时 code，用于后端换取 session（不做强制跳转）
     wx.login({
-      success: res => {
-        // 发送 res.code 到后台换取 openId, sessionKey, unionId
-      }
-    }),
-    this.checkLoginStatus();
+      success: () => {}
+    })
+
+    // 系统级隐私授权：如需授权，则拉起授权弹窗
+    if (wx.getPrivacySetting && wx.requirePrivacyAuthorize) {
+      wx.getPrivacySetting({
+        success: (res) => {
+          if (res.needAuthorization) {
+            wx.requirePrivacyAuthorize({
+              success: () => {},
+              fail: () => {},
+              complete: () => {}
+            })
+          }
+        }
+      })
+    }
   },
+
+  // 当需要拉起隐私弹窗时回调；这里引导用户查看隐私协议
+  onNeedPrivacyAuthorization(resolve) {
+    if (wx.openPrivacyContract) {
+      wx.openPrivacyContract({
+        success: () => {},
+        complete: () => {
+          // 返回给框架，继续拉起系统隐私弹窗
+          if (typeof resolve === 'function') resolve()
+        }
+      })
+    } else {
+      // 低版本兜底
+      if (typeof resolve === 'function') resolve()
+    }
+  },
+
   globalData: {
     userInfo: null
-  },
-  checkLoginStatus() {
-    const openid = wx.getStorageSync("openid");
-    if (!openid) {
-      wx.redirectTo({
-        url: "/pages/login/login"
-      });
-    }
   }
 })

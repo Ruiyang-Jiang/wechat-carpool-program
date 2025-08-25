@@ -104,3 +104,27 @@
 }
 .suggest-item + .suggest-item{ border-top:1rpx solid #f3f3f3; }
 .suggest-item:active{ background:#f2fdf4; }
+
+/* ---------- 底部隐私协议入口 ---------- */
+.privacy-footer{
+  position:fixed;
+  left:0; right:0; bottom:20rpx;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10rpx;
+  pointer-events:auto;
+}
+.privacy-btn{
+  background:#ffffff;
+  color:#07c160;
+  border:2rpx solid #07c160;
+  padding:10rpx 20rpx;
+  border-radius:999rpx;
+  box-shadow:0 4rpx 14rpx rgba(0,0,0,.06);
+}
+.privacy-hint{
+  font-size:24rpx;
+  color:#8c8c8c;
+}

@@ -69,17 +69,17 @@
   <!-- ======= 发布者信息 ======= -->
   <view class="publisher-card">
     <view class="publisher-row">
-      <text>发布者微信：</text>
-      <text class="bold">{{publisherInfo.wechat || '未提供'}}</text>
-      <button type="primary" size="mini" bindtap="handleCopyWeChat" wx:if="{{publisherInfo.wechat}}">复制</button>
+      <text>发布者联系方式：</text>
+      <text class="bold">{{userOpenid ? (publisherInfo.wechat || '未提供') : '**********'}}</text>
+      <button type="primary" size="mini" bindtap="handleCopyWeChat">{{userOpenid ? '复制' : '登录后复制'}}</button>
     </view>
     <!-- 仅对请求展示参与者联系方式列表 -->
     <view wx:if="{{detail.type==='request' && participantsInfo && participantsInfo.length}}" style="margin-top:12rpx;">
       <block wx:for="{{participantsInfo}}" wx:key="openid">
         <view class="publisher-row">
           <text>{{item.nickName || '参与者乘客微信:'}}</text>
-          <text class="bold" style="margin-left:8rpx;">{{item.wechat || '未提供'}}</text>
-          <button wx:if="{{item.wechat}}" type="primary" size="mini" data-wxid="{{item.wechat}}" bindtap="copyParticipantWeChat">复制</button>
+          <text class="bold" style="margin-left:8rpx;">{{userOpenid ? (item.wechat || '未提供') : '**********'}}</text>
+          <button wx:if="{{userOpenid && item.wechat}}" type="primary" size="mini" data-wxid="{{item.wechat}}" bindtap="copyParticipantWeChat">复制</button>
         </view>
       </block>
     </view>

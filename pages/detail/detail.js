@@ -26,6 +26,15 @@ Page({
     this.setData({ itemId: id, userOpenid: openid }, this.loadDetail)
   },
 
+  /* 返回页面时刷新登录状态与展示 */
+  onShow() {
+    const openid = wx.getStorageSync('openid') || ''
+    this.setData({ userOpenid: openid })
+    if (this.data.detail && this.data.detail.publisher_id) {
+      this.loadPublisher(this.data.detail.publisher_id)
+    }
+  },
+
   /* ---------- 获取行程详情 ---------- */
   loadDetail() {
     db.collection('rides').doc(this.data.itemId).get()
@@ -69,11 +78,26 @@ Page({
         const info = res.data || {}
         // 优先使用行程里填写的微信号
         if (this.data.detail.contact_wechat) info.wechat = this.data.detail.contact_wechat
-        this.setData({ publisherInfo: info })
+        // 不再隐藏微信号，让UI层处理显示逻辑
+        this.setData({ publisherInfo: info, userOpenid: this.data.userOpenid })
       })
   },
 
   handleCopyWeChat(){
+    const userOpenid = wx.getStorageSync('openid') || ''
+    if (!userOpenid) {
+      wx.showModal({
+        title: '需要登录',
+        content: '登录后可复制并查看微信号',
+        success: res => {
+          if (res.confirm) {
+            // 直接调用云函数进行登录，而不是跳转页面
+            this.loginViaCloudFunction()
+          }
+        }
+      })
+      return
+    }
     const wxid = this.data.publisherInfo.wechat
     if (!wxid) {
       wx.showToast({ title:'未提供微信号', icon:'none' })
@@ -82,7 +106,55 @@ Page({
     wx.setClipboardData({ data: wxid })
   },
 
+  // 通过云函数进行登录
+  loginViaCloudFunction() {
+    wx.showLoading({ title: '登录中...', mask: true })
+    
+    // 调用登录云函数
+    wx.cloud.callFunction({
+      name: 'loginUser',
+      success: (res) => {
+        wx.hideLoading()
+        if (res.result && res.result.success) {
+          // 登录成功，存储openid
+          wx.setStorageSync('openid', res.result.openid)
+          // 刷新页面状态
+          this.setData({ userOpenid: res.result.openid })
+          // 重新加载发布者信息
+          if (this.data.detail && this.data.detail.publisher_id) {
+            this.loadPublisher(this.data.detail.publisher_id)
+          }
+          wx.showToast({ title: '登录成功', icon: 'success' })
+        } else {
+          wx.showToast({ 
+            title: res.result?.message || '登录失败', 
+            icon: 'none' 
+          })
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading()
+        console.error('登录云函数调用失败:', err)
+        wx.showToast({ title: '登录失败，请稍后重试', icon: 'none' })
+      }
+    })
+  },
+
   copyParticipantWeChat(e){
+    const userOpenid = wx.getStorageSync('openid') || ''
+    if (!userOpenid) {
+      wx.showModal({
+        title: '需要登录',
+        content: '登录后可复制并查看微信号',
+        success: res => {
+          if (res.confirm) {
+            // 直接调用云函数进行登录，而不是跳转页面
+            this.loginViaCloudFunction()
+          }
+        }
+      })
+      return
+    }
     const wxid = e.currentTarget.dataset.wxid
     if (!wxid) return
     wx.setClipboardData({ data: wxid })

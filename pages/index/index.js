@@ -29,6 +29,14 @@ Page({
 
   onLoad() {},
 
+  openPrivacy() {
+    if (wx.openPrivacyContract) {
+      wx.openPrivacyContract({})
+    } else {
+      wx.showToast({ title: '当前版本不支持', icon: 'none' })
+    }
+  },
+
   onSearchDateChange(e)  { this.setData({ searchDate:  e.detail.value }); },
   onSearch2DateChange(e) { this.setData({ search2Date: e.detail.value }); },
 

@@ -10,8 +10,9 @@ Page({
   data:{
     /* ------- 页面 / 组件状态 ------- */
     currentSubTab: 'driver',      // 默认 Tab：'driver'=找乘客，'passenger'=找司机
-    todayString:   '',            // onLoad 中写入“YYYY-MM-DD”
-    currentTime:   '',            // onLoad 中写入“HH:mm”
+    todayString:   '',            // onLoad 中写入"YYYY-MM-DD"
+    currentTime:   '',            // onLoad 中写入"HH:mm"
+    userOpenid:    '',            // 用户登录状态
   
     /* ------- 位置相关 ------- */
     departure_place:{ city:'', state:'', lat:null, lng:null },
@@ -52,6 +53,20 @@ Page({
     const userInfo = wx.getStorageSync('userInfo')||{}
     if(userInfo.wechat) this.setData({ contact_wechat:userInfo.wechat })
     log('cached wechat', userInfo.wechat||'none')
+    
+    // 检查登录状态
+    this.checkLoginStatus()
+  },
+
+  onShow() {
+    // 每次显示页面时检查登录状态
+    this.checkLoginStatus()
+  },
+
+  // 检查登录状态
+  checkLoginStatus() {
+    const openid = wx.getStorageSync('openid') || ''
+    this.setData({ userOpenid: openid })
   },
 
   /* ---------- Tab 切换 ---------- */
@@ -107,6 +122,20 @@ Page({
 
   /* ---------- 提交 ---------- */
   submitRide(){
+    // 检查登录状态
+    if (!this.data.userOpenid) {
+      wx.showModal({
+        title: '需要登录',
+        content: '登录后才能发布顺风车信息',
+        success: res => {
+          if (res.confirm) {
+            this.loginViaCloudFunction()
+          }
+        }
+      })
+      return
+    }
+
     const d = this.data
     const mode     = d.currentSubTab === 'passenger' ? 'request' : 'ride'
     const funcName = mode === 'ride' ? 'createRide' : 'createRideRequest'
@@ -262,6 +291,36 @@ Page({
     const stopovers = [...this.data.stopovers]
     stopovers.splice(index, 1)
     this.setData({ stopovers })
+  },
+
+  // 通过云函数进行登录
+  loginViaCloudFunction() {
+    wx.showLoading({ title: '登录中...', mask: true })
+    
+    // 调用登录云函数
+    wx.cloud.callFunction({
+      name: 'loginUser',
+      success: (res) => {
+        wx.hideLoading()
+        if (res.result && res.result.success) {
+          // 登录成功，存储openid
+          wx.setStorageSync('openid', res.result.openid)
+          // 刷新页面状态
+          this.setData({ userOpenid: res.result.openid })
+          wx.showToast({ title: '登录成功', icon: 'success' })
+        } else {
+          wx.showToast({ 
+            title: res.result?.message || '登录失败', 
+            icon: 'none' 
+          })
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading()
+        console.error('登录云函数调用失败:', err)
+        wx.showToast({ title: '登录失败，请稍后重试', icon: 'none' })
+      }
+    })
   },
 
   /* ---------- 重置 ---------- */

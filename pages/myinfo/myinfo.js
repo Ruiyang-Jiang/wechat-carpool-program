@@ -52,7 +52,7 @@ Page({
   /* ---------------- 页面初始化 ---------------- */
   async initPage() {
     const openid = wx.getStorageSync('openid')
-    if (!openid) { wx.showToast({ title: '请先登录', icon: 'none' }); return }
+    if (!openid) { this.setData({ loggedIn: false, userInfo: {} }); return }
 
     const userRes = await db.collection('users').doc(openid).get().catch(() => ({}))
     const user = userRes.data || {}
@@ -63,6 +63,19 @@ Page({
       this.loadDriverRides(user),
       this.loadMyPublished(openid)
     ])
+  },
+
+  /* ---------------- Tab 切换 ---------------- */
+  switchToPassenger() { this.setData({ currentTab: 'passenger' }) },
+  switchToDriver()    { this.setData({ currentTab: 'driver'    }) },
+  switchToMine()      { this.setData({ currentTab: 'mine'      }) },
+
+  /* ---------------- 下拉刷新 ---------------- */
+  async onRefresh() {
+    this.setData({ isRefreshing: true })
+    await this.initPage()
+    this.setData({ isRefreshing: false })
+    wx.showToast({ title: '刷新成功', icon: 'success' })
   },
 
   /* ---------------- 加载三类记录 ---------------- */
@@ -90,19 +103,6 @@ Page({
       status: _.neq('closed')  // 过滤掉已关闭的记录
     }).get()
     this.setData({ myPublished: sortByDateDesc(res.data).map(decorate) })
-  },
-
-  /* ---------------- Tab 切换 ---------------- */
-  switchToPassenger() { this.setData({ currentTab: 'passenger' }) },
-  switchToDriver()    { this.setData({ currentTab: 'driver'    }) },
-  switchToMine()      { this.setData({ currentTab: 'mine'      }) },
-
-  /* ---------------- 下拉刷新 ---------------- */
-  async onRefresh() {
-    this.setData({ isRefreshing: true })
-    await this.initPage()
-    this.setData({ isRefreshing: false })
-    wx.showToast({ title: '刷新成功', icon: 'success' })
   },
 
   /* ------------------------------------------------------------------ */
@@ -201,5 +201,45 @@ Page({
   /* 跳详情 */
   navigateToDetail(e) {
     wx.navigateTo({ url: `/pages/detail/detail?id=${e.currentTarget.dataset.id}` })
+  }
+  ,
+
+  /* 打开隐私协议 */
+  openPrivacy() {
+    if (wx.openPrivacyContract) {
+      wx.openPrivacyContract({})
+    } else {
+      wx.showToast({ title: '当前版本不支持', icon: 'none' })
+    }
+  },
+
+  // 通过云函数进行登录
+  loginViaCloudFunction() {
+    wx.showLoading({ title: '登录中...', mask: true })
+    
+    // 调用登录云函数
+    wx.cloud.callFunction({
+      name: 'loginUser',
+      success: (res) => {
+        wx.hideLoading()
+        if (res.result && res.result.success) {
+          // 登录成功，存储openid
+          wx.setStorageSync('openid', res.result.openid)
+          // 刷新页面状态
+          this.initPage()
+          wx.showToast({ title: '登录成功', icon: 'success' })
+        } else {
+          wx.showToast({ 
+            title: res.result?.message || '登录失败', 
+            icon: 'none' 
+          })
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading()
+        console.error('登录云函数调用失败:', err)
+        wx.showToast({ title: '登录失败，请稍后重试', icon: 'none' })
+      }
+    })
   }
 })

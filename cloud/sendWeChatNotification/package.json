@@ -1,0 +1,9 @@
+{
+  "name": "sendWeChatNotification",
+  "version": "1.0.0",
+  "description": "Send WeChat notifications cloud function",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

@@ -8,6 +8,12 @@
   <view class="tab {{currentTab==='mine'?'active':''}}"      bindtap="switchToMine">我发布</view>
 </view>
 
+<!-- ======= 页脚登录按钮 ======= -->
+<view wx:if="{{!loggedIn}}" class="login-footer">
+  <button class="login-btn" type="primary" bindtap="loginViaCloudFunction">登录</button>
+  <text class="login-hint">登录后可查看和管理您的顺风车记录</text>
+</view>
+
 <!-- ================= 乘坐记录 ================= -->
 <block wx:if="{{currentTab==='passenger'}}">
   <view wx:if="{{ridesAsPassenger.length === 0}}" class="empty-tip">
@@ -29,7 +35,7 @@
 </block>
 
 <!-- ================= 我发布 ================= -->
-<block wx:else>
+<block wx:elif="{{currentTab==='mine'}}">
   <view wx:if="{{myPublished.length === 0}}" class="empty-tip">
     暂无发布记录
   </view>

@@ -198,5 +198,7 @@
   </view>
 
   <!-- 提交 -->
-  <button class="publish-btn" type="primary" bindtap="submitRide">{{currentSubTab==='driver' ? '发布车找人' : '发布人找车'}}</button>
+  <button class="publish-btn" type="primary" bindtap="submitRide">
+    {{userOpenid ? (currentSubTab==='driver' ? '发布车找人' : '发布人找车') : '登录后发布'}}
+  </button>
 </view>
