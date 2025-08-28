@@ -1,0 +1,8 @@
+<view class="settings">
+  <view class="card">
+    <view class="title">账号与数据</view>
+    <button bindtap="deleteAccount" type="warn">删除账号 / 清除发布与参与记录</button>
+    <text class="hint">删除后不可恢复，请慎重操作（即时生效）</text>
+  </view>
+</view>
+

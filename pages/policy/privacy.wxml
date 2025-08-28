@@ -1,0 +1,19 @@
+<view class="doc">
+  <view class="title">隐私政策（简要）</view>
+  <view class="section">
+    <text>我们仅在必要时收集以下信息：OpenID、昵称头像、发布内容、（如启用）定位、设备信息、IP。用于提供顺风车信息服务与安全风控。</text>
+  </view>
+  <view class="section">
+    <text>我们不参与计价、撮合交易或收取运输费用；平台仅提供信息发布与沟通。</text>
+  </view>
+  <view class="section">
+    <text>数据保存在云开发环境，保存期限以业务需要为限。用户可在“设置”中删除账号，数据将即时删除或脱敏。</text>
+  </view>
+  <view class="section">
+    <text>权限使用：定位/相册/相机/订阅消息仅在使用相关功能时申请，拒绝后仍可浏览。</text>
+  </view>
+  <view class="section">
+    <text>未成年人条款：如您未满18岁，请在监护人指导下使用。如有问题请联系 rj393@cornell.edu。</text>
+  </view>
+</view>
+

@@ -105,7 +105,7 @@
 .suggest-item + .suggest-item{ border-top:1rpx solid #f3f3f3; }
 .suggest-item:active{ background:#f2fdf4; }
 
-/* ---------- 底部隐私协议入口 ---------- */
+/* ---------- 底部声明与快捷入口 ---------- */
 .privacy-footer{
   position:fixed;
   left:0; right:0; bottom:20rpx;
@@ -113,18 +113,102 @@
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:10rpx;
+  gap:12rpx;
   pointer-events:auto;
-}
-.privacy-btn{
-  background:#ffffff;
-  color:#07c160;
-  border:2rpx solid #07c160;
-  padding:10rpx 20rpx;
-  border-radius:999rpx;
-  box-shadow:0 4rpx 14rpx rgba(0,0,0,.06);
+  padding: 0 20rpx;
 }
 .privacy-hint{
-  font-size:24rpx;
-  color:#8c8c8c;
+  font-size:22rpx;
+  color:#666;
+  text-align:center;
 }
+.privacy-btn{
+  background:#e6f7ec;
+  color:#0a8f3e;
+  border:1rpx solid #b8e6c9;
+  padding:10rpx 18rpx;
+  border-radius:999rpx;
+  box-shadow:0 2rpx 8rpx rgba(0,0,0,.04);
+}
+.privacy-btn:active{ opacity:.8 }
+
+/* 底部三列卡片布局 */
+.footer-grid{
+  width:100%;
+  max-width: 680rpx;
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+}
+.footer-card{
+  background:#fff;
+  border:1rpx solid #eee;
+  border-radius:12rpx;
+  padding:12rpx;
+  text-align:center;
+}
+.footer-title{
+  font-size:24rpx;
+  color:#333;
+  margin-bottom:6rpx;
+}
+.footer-buttons{ display:flex; flex-direction:column; gap:8rpx; }
+
+/* 外层卡片 */
+.privacy-footer {
+  max-width: 700rpx;
+  margin: 32rpx auto;
+  padding: 20rpx 24rpx;
+  background: #fafbfc;
+  border: 1rpx solid #e6e7eb;
+  border-radius: 16rpx;
+  box-shadow: 0 6rpx 18rpx rgba(0,0,0,0.04);
+}
+
+/* 顶部提示行 */
+.pf-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+.pf-tip-icon {
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+.pf-tip-text {
+  font-size: 24rpx;
+  color: #596780;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+/* 按钮区：三等分 */
+.pf-actions {
+  display: flex;
+  gap: 12rpx;
+}
+.pf-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15rpx 5rpx;   /* 按钮更窄 */
+  font-size: 10rpx;      /* 小一号 */
+  background: #07c160;   /* 与上方“搜索顺风车”同色 */
+  color: #fff;
+  border: 1rpx solid #07c160;
+  border-radius: 12rpx;
+  white-space: nowrap;
+}
+.pf-btn-icon { font-size: 22rpx; color: #fff; }
+.pf-btn:active { background: #06ad56; transform: scale(0.98); opacity: 1; }
+.pf-btn-danger {
+  background: #07c160;
+  border-color: #07c160;
+  color: #fff;
+}
+
+/* 可选：底部安全区（若放页面最底部时启用）
+.privacy-footer { padding-bottom: calc(20rpx + env(safe-area-inset-bottom)); }
+*/

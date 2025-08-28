@@ -213,10 +213,15 @@ Page({
     }
   },
 
+  /* 打开设置页 */
+  goSettings() {
+    wx.navigateTo({ url: '/pages/settings/settings' })
+  },
+
   // 通过云函数进行登录
   loginViaCloudFunction() {
     wx.showLoading({ title: '登录中...', mask: true })
-    
+
     // 调用登录云函数
     wx.cloud.callFunction({
       name: 'loginUser',
@@ -229,9 +234,9 @@ Page({
           this.initPage()
           wx.showToast({ title: '登录成功', icon: 'success' })
         } else {
-          wx.showToast({ 
-            title: res.result?.message || '登录失败', 
-            icon: 'none' 
+          wx.showToast({
+            title: res.result?.message || '登录失败',
+            icon: 'none'
           })
         }
       },

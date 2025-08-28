@@ -1,0 +1,7 @@
+.feedback{padding:24rpx}
+.field{margin-bottom:18rpx}
+.label{display:block;margin-bottom:8rpx;color:#555}
+.input,.textarea{background:#fff;border:1rpx solid #eee;border-radius:12rpx;padding:16rpx;font-size:28rpx}
+.textarea{min-height:180rpx}
+.picker{padding:16rpx;background:#fff;border:1rpx solid #eee;border-radius:12rpx}
+

@@ -29,13 +29,10 @@ Page({
 
   onLoad() {},
 
-  openPrivacy() {
-    if (wx.openPrivacyContract) {
-      wx.openPrivacyContract({})
-    } else {
-      wx.showToast({ title: '当前版本不支持', icon: 'none' })
-    }
-  },
+  // 用户协议按钮：页面内包含隐私政策链接
+  openTerms() { wx.navigateTo({ url: '/pages/policy/terms' }) },
+  openFeedback() { wx.navigateTo({ url: '/pages/feedback/feedback' }) },
+  openAccountSettings() { wx.navigateTo({ url: '/pages/settings/settings' }) },
 
   onSearchDateChange(e)  { this.setData({ searchDate:  e.detail.value }); },
   onSearch2DateChange(e) { this.setData({ search2Date: e.detail.value }); },

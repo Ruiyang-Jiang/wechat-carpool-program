@@ -91,4 +91,9 @@
     <button class="action-btn" type="primary" bindtap="takeOrder" wx:if="{{detail.type==='request' && canDriverAccept}}">我要接单</button>
     <button class="action-btn" type="default"  bindtap="joinAsPassenger" wx:if="{{detail.type==='request' && canJoinAsPassenger}}">加入此请求</button>
   </block>
+
+  <!-- ======= 举报 / 反馈入口 ======= -->
+  <view style="padding:20rpx;text-align:center;">
+    <button size="mini" bindtap="openFeedback">举报 / 反馈</button>
+  </view>
 </block>

@@ -68,12 +68,30 @@
   </view>
 </block>
 
-<!-- ======= 页脚隐私协议入口 ======= -->
+<!-- ======= 页脚：免责声明/协议/反馈/账号 ======= -->
 <view class="privacy-footer">
-  <button class="privacy-btn" size="mini" bindtap="openPrivacy">查看隐私协议</button>
-  <text class="privacy-hint">我们重视您的隐私与数据安全</text>
-  
+  <view class="pf-tip">
+    <text class="pf-tip-icon">ℹ️</text>
+    <text class="pf-tip-text">
+      免责声明：本小程序仅提供顺风车信息发布与沟通，不参与计价或收取费用。
+    </text>
+  </view>
+
+  <view class="pf-actions" catchtap="handleStopPropagation">
+    <button class="pf-btn" size="mini" bindtap="openTerms">
+      <text>协议</text>/<text>隐私</text>
+    </button>
+
+    <button class="pf-btn" size="mini" bindtap="openFeedback">
+      <text>意见反馈</text>
+    </button>
+
+    <button class="pf-btn pf-btn-danger" size="mini" bindtap="openAccountSettings">
+      <text>删除账号</text>
+    </button>
+  </view>
 </view>
+
 <!-- ========================================================= -->
 <!-- ===================== 人 找 车 =========================== -->
 <!-- ========================================================= -->

@@ -1,0 +1,21 @@
+<view class="doc">
+  <view class="title">用户协议</view>
+
+  <view class="section">
+    <text>本小程序为“非营利顺风车信息撮合”工具，仅提供信息发布与沟通能力，不构成运输或营运服务。</text>
+  </view>
+
+  <view class="section">
+    <text>禁止发布违法违规内容；发布/留言前将进行内容安全检测。违规将下架、禁言或封禁。</text>
+  </view>
+
+  <view class="section">
+    <text>您应自行与对方协商出行细节；请注意人身与财产安全。</text>
+  </view>
+
+  <view class="section link-box">
+    <text>阅读完整</text>
+    <navigator url="/pages/policy/privacy" class="link">《隐私政策》</navigator>
+  </view>
+</view>
+

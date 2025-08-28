@@ -1,0 +1,22 @@
+<view class="feedback">
+  <view class="field">
+    <text class="label">类型</text>
+    <picker mode="selector" range="{{types}}" value="{{typeIndex}}" bindchange="onTypeChange">
+      <view class="picker">{{types[typeIndex]}}</view>
+    </picker>
+  </view>
+  <view class="field">
+    <text class="label">标题</text>
+    <input class="input" placeholder="简要描述" value="{{title}}" bindinput="onTitle" />
+  </view>
+  <view class="field">
+    <text class="label">内容</text>
+    <textarea class="textarea" placeholder="请详细描述问题（至少10个字）" value="{{content}}" bindinput="onContent" />
+  </view>
+  <view class="field">
+    <text class="label">联系方式（可选）</text>
+    <input class="input" placeholder="微信/邮箱" value="{{contact}}" bindinput="onContact" />
+  </view>
+  <button type="primary" bindtap="submit">提交</button>
+</view>
+

@@ -7,11 +7,15 @@
     "pages/myinfo/myinfo",
     "pages/publish/publish",
     "pages/detail/detail",
+    "pages/settings/settings",
+    "pages/policy/privacy",
+    "pages/policy/terms",
+    "pages/feedback/feedback",
     "cloud/getCitites"
   ],
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "顺风车",
+    "navigationBarTitleText": "我的顺顺行",
     "navigationBarBackgroundColor": "#00AA00",
     "enablePullDownRefresh": true,
     "backgroundColor": "#efefef",
@@ -28,7 +32,7 @@
       },
       {
         "pagePath": "pages/list/list",
-        "text": "顺风车",
+        "text": "行程",
         "iconPath": "images/icons/examples.png",
         "selectedIconPath": "images/icons/examples-active.png"
       },

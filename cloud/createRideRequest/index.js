@@ -6,6 +6,20 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
+async function secCheckText(text = '') {
+  const content = String(text || '').slice(0, 4900)
+  if (!content) return { pass: true }
+  try {
+    if (cloud.openapi && cloud.openapi.security && cloud.openapi.security.msgSecCheck) {
+      await cloud.openapi.security.msgSecCheck({ content })
+    }
+    return { pass: true }
+  } catch (err) {
+    console.error('msgSecCheck blocked:', err && err.errCode, err && err.errMsg)
+    return { pass: false, msg: '发布内容可能包含不合规信息' }
+  }
+}
+
 exports.main = async (event) => {
   /* ---------- 取 openid（Node-18 建议写法） ---------- */
   const { OPENID: openid } = cloud.getWXContext() || {}
@@ -28,6 +42,15 @@ exports.main = async (event) => {
   const today = new Date().toISOString().slice(0, 10)
   if (departure_date < today)
     return { ok:false, msg:'出发日期不能早于今天' }
+
+  /* ---------- 内容安全检测（文本） ---------- */
+  const textToCheck = [
+    departure_place?.city, arrival_place?.city,
+    (stopovers || []).map(s => s?.city).filter(Boolean).join(' '),
+    contact_wechat
+  ].filter(Boolean).join(' ')
+  const sec = await secCheckText(textToCheck)
+  if (!sec.pass) return { ok:false, msg: sec.msg || '内容安全检测未通过' }
 
   /* ---------- 保存 / 更新用户微信号 ---------- */
   if (contact_wechat) {

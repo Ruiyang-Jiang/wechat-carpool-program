@@ -247,5 +247,10 @@ Page({
       },
       complete: () => wx.hideLoading()
     })
+  },
+
+  /* 举报/反馈入口 */
+  openFeedback(){
+    wx.navigateTo({ url: '/pages/feedback/feedback?type=举报' })
   }
 })

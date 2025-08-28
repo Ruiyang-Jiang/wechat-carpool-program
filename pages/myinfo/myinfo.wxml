@@ -43,3 +43,4 @@
     <template is="rideCard" data="{{ item: item, currentTab: currentTab }}"/>
   </block>
 </block>
+
