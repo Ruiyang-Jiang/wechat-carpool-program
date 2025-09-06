@@ -104,6 +104,22 @@ Page({
       return
     }
     wx.setClipboardData({ data: wxid })
+
+    // 复制后通知发布者
+    try {
+      const d = this.data.detail || {}
+      const route = `${d.departure_place?.city || ''} → ${d.arrival_place?.city || ''}`
+      const date  = `${d.departure_date || ''} ${d.departure_time || ''}`.trim()
+      const title = d.type === 'ride' ? '车找人' : '人找车'
+      const content = `有人对你的${title}（${date}，${route}）行程感兴趣并复制了您的联系方式`
+      const touser  = d.publisher_id
+      if (touser) {
+        wx.cloud.callFunction({
+          name: 'sendWeChatNotification',
+          data: { touser, content, rideInfo: { id: d._id, type: d.type, date, route } }
+        })
+      }
+    } catch (e) { /* 忽略通知失败 */ }
   },
 
   // 通过云函数进行登录
@@ -158,6 +174,20 @@ Page({
     const wxid = e.currentTarget.dataset.wxid
     if (!wxid) return
     wx.setClipboardData({ data: wxid })
+
+    // 复制参与者微信后通知请求发布者（仅在请求页）
+    try {
+      const d = this.data.detail || {}
+      if (d.type === 'request') {
+        const route = `${d.departure_place?.city || ''} → ${d.arrival_place?.city || ''}`
+        const date  = `${d.departure_date || ''} ${d.departure_time || ''}`.trim()
+        const content = `有参与者微信被复制，乘客对你的请求（${date}，${route}）感兴趣`
+        const touser  = d.publisher_id
+        if (touser) {
+          wx.cloud.callFunction({ name: 'sendWeChatNotification', data: { touser, content } })
+        }
+      }
+    } catch (e) { /* 忽略通知失败 */ }
   },
 
   /* ---------- 接单 / 报名 ---------- */

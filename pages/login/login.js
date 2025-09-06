@@ -28,29 +28,20 @@ Page({
     const openid = wx.getStorageSync("openid");
 
     if (openid) {
-      db.collection("users").where({ openid }).get().then((res) => {
-        if (res.data.length > 0) {
-          // 用户已注册，更新状态
-          this.setData({
-            userInfo: res.data[0],
-            loggedIn: true
-          });
-
-          // 直接跳转到首页
+      db.collection("users").doc(openid).get().then((res) => {
+        if (res.data) {
+          // 用户已注册（以 openid 作为 docId 的规范写法）
+          this.setData({ userInfo: res.data, loggedIn: true });
           wx.switchTab({ url: "/pages/index/index" });
         } else {
           this.setData({ loggedIn: false });
         }
       }).catch((err) => {
-        console.error("数据库查询失败:", err);
-        // 如果是集合不存在的错误，尝试初始化数据库
-        if (err.code === 'DATABASE_COLLECTION_NOT_EXIST') {
+        console.error("读取用户信息失败:", err);
+        if (err && (err.errCode === -1 || err.code === 'DATABASE_COLLECTION_NOT_EXIST')) {
           this.initializeDatabase();
         } else {
-          wx.showToast({
-            title: '数据库连接失败，请稍后重试',
-            icon: 'none'
-          });
+          wx.showToast({ title: '数据库连接失败，请稍后重试', icon: 'none' });
         }
         this.setData({ loggedIn: false });
       });
@@ -92,58 +83,43 @@ Page({
             const db = wx.cloud.database();
 
             // 先检查数据库是否已有该用户
-            db.collection("users").where({ openid }).get().then(queryRes => {
-              if (queryRes.data.length === 0) {
-                // 新用户，存入数据库
-                db.collection("users").add({
+            // 以 openid 作为 docId（与云函数 loginUser 保持一致）
+            db.collection("users").doc(openid).get().then(snap => {
+              if (!snap.data) {
+                // 新用户：创建文档（docId = openid）
+                db.collection("users").doc(openid).set({
                   data: {
+                    _id: openid,
                     openid: openid,
                     nickname: userInfo.nickName,
                     avatarUrl: userInfo.avatarUrl,
-                    phone: "",  // 预留字段，用户可以手动输入
-                    wechat: "", // 预留字段，用户可以手动输入
+                    phone: "",
+                    wechat: "",
                     created_at: new Date().toISOString(),
-                    as_driver: [], // 司机的顺风车订单
-                    as_passenger: [] // 乘客的顺风车订单
+                    as_driver: [],
+                    as_passenger: []
                   }
                 }).then(() => {
                   wx.showToast({ title: "注册成功", icon: "success" });
-
-                  // 更新页面状态
-                  this.setData({
-                    userInfo: userInfo,
-                    loggedIn: true
-                  });
-
-                  // 跳转到首页
+                  this.setData({ userInfo: userInfo, loggedIn: true });
                   wx.switchTab({ url: "/pages/index/index" });
-                }).catch((err) => {
-                  console.error("用户信息存储失败:", err);
-                });
+                })
               } else {
-                // 旧用户，更新数据库信息
-                db.collection("users").where({ openid }).update({
+                // 老用户：更新头像/昵称
+                db.collection("users").doc(openid).update({
                   data: {
                     nickname: userInfo.nickName,
                     avatarUrl: userInfo.avatarUrl
                   }
                 }).then(() => {
                   wx.showToast({ title: "登录成功", icon: "success" });
-
-                  // 更新页面状态
-                  this.setData({
-                    userInfo: userInfo,
-                    loggedIn: true
-                  });
-
-                  // 跳转到首页
+                  this.setData({ userInfo: userInfo, loggedIn: true });
                   wx.switchTab({ url: "/pages/index/index" });
-                }).catch((err) => {
-                  console.error("用户信息更新失败:", err);
-                });
+                })
               }
             }).catch((err) => {
-              console.error("数据库查询失败:", err);
+              console.error("读取/写入用户失败:", err);
+              wx.showToast({ title: "登录失败，请稍后重试", icon: "none" });
             });
           },
           fail: (err) => {
