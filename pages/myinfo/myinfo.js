@@ -221,30 +221,18 @@ Page({
   // 通过云函数进行登录
   loginViaCloudFunction() {
     wx.showLoading({ title: '登录中...', mask: true })
-
-    // 调用登录云函数
-    wx.cloud.callFunction({
-      name: 'loginUser',
-      success: (res) => {
+    wx.cloud.callFunction({ name:'loginUser',
+      success:(res)=>{
         wx.hideLoading()
-        if (res.result && res.result.success) {
-          // 登录成功，存储openid
+        if (res?.result?.success && res.result.openid){
           wx.setStorageSync('openid', res.result.openid)
-          // 刷新页面状态
           this.initPage()
-          wx.showToast({ title: '登录成功', icon: 'success' })
+          wx.showToast({ title:'登录成功', icon:'success' })
         } else {
-          wx.showToast({
-            title: res.result?.message || '登录失败',
-            icon: 'none'
-          })
+          wx.showToast({ title: res?.result?.message || '登录失败', icon:'none' })
         }
       },
-      fail: (err) => {
-        wx.hideLoading()
-        console.error('登录云函数调用失败:', err)
-        wx.showToast({ title: '登录失败，请稍后重试', icon: 'none' })
-      }
+      fail:(err)=>{ wx.hideLoading(); console.error('loginUser fail:', err); wx.showToast({ title:'登录失败', icon:'none' }) }
     })
   }
 })

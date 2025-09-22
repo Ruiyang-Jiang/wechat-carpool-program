@@ -124,14 +124,21 @@ Page({
   submitRide(){
     // 检查登录状态
     if (!this.data.userOpenid) {
-      wx.showModal({
-        title: '需要登录',
-        content: '登录后才能发布顺风车信息',
-        success: res => {
-          if (res.confirm) {
-            this.loginViaCloudFunction()
+      wx.showLoading({ title: '登录中...', mask: true })
+      wx.cloud.callFunction({ name:'loginUser',
+        success:(res)=>{
+          wx.hideLoading()
+          if (res?.result?.success && res.result.openid){
+            wx.setStorageSync('openid', res.result.openid)
+            this.setData({ userOpenid: res.result.openid })
+            wx.showToast({ title:'已登录', icon:'success' })
+            // 登录后继续提交
+            this.submitRide()
+          } else {
+            wx.showToast({ title: res?.result?.message || '登录失败', icon:'none' })
           }
-        }
+        },
+        fail:(err)=>{ wx.hideLoading(); console.error('loginUser fail:', err); wx.showToast({ title:'登录失败', icon:'none' }) }
       })
       return
     }

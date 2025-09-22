@@ -86,23 +86,27 @@ Page({
   handleCopyWeChat(){
     const userOpenid = wx.getStorageSync('openid') || ''
     if (!userOpenid) {
-      wx.showModal({
-        title: '需要登录',
-        content: '登录后可复制并查看微信号',
-        success: res => {
-          if (res.confirm) {
-            // 直接调用云函数进行登录，而不是跳转页面
-            this.loginViaCloudFunction()
+      // 直接云函数登录，不跳页面
+      wx.showLoading({ title: '登录中...', mask: true })
+      wx.cloud.callFunction({ name: 'loginUser',
+        success: (res)=>{
+          wx.hideLoading()
+          if (res?.result?.success && res.result.openid){
+            wx.setStorageSync('openid', res.result.openid)
+            this.setData({ userOpenid: res.result.openid })
+            wx.showToast({ title:'已登录', icon:'success' })
+            // 登录后继续复制
+            this.handleCopyWeChat()
+          } else {
+            wx.showToast({ title: res?.result?.message || '登录失败', icon:'none' })
           }
-        }
+        },
+        fail: (err)=>{ wx.hideLoading(); console.error('loginUser fail:', err); wx.showToast({ title:'登录失败', icon:'none' }) }
       })
       return
     }
     const wxid = this.data.publisherInfo.wechat
-    if (!wxid) {
-      wx.showToast({ title:'未提供微信号', icon:'none' })
-      return
-    }
+    if (!wxid) { wx.showToast({ title:'未提供微信号', icon:'none' }); return }
     wx.setClipboardData({ data: wxid })
 
     // 复制后通知发布者
@@ -114,10 +118,7 @@ Page({
       const content = `有人对你的${title}（${date}，${route}）行程感兴趣并复制了您的联系方式`
       const touser  = d.publisher_id
       if (touser) {
-        wx.cloud.callFunction({
-          name: 'sendWeChatNotification',
-          data: { touser, content, rideInfo: { id: d._id, type: d.type, date, route } }
-        })
+        wx.cloud.callFunction({ name:'sendWeChatNotification', data:{ touser, content, rideInfo:{ id:d._id, type:d.type, date, route } } })
       }
     } catch (e) { /* 忽略通知失败 */ }
   },
@@ -159,18 +160,25 @@ Page({
   copyParticipantWeChat(e){
     const userOpenid = wx.getStorageSync('openid') || ''
     if (!userOpenid) {
-      wx.showModal({
-        title: '需要登录',
-        content: '登录后可复制并查看微信号',
-        success: res => {
-          if (res.confirm) {
-            // 直接调用云函数进行登录，而不是跳转页面
-            this.loginViaCloudFunction()
+      wx.showLoading({ title: '登录中...', mask: true })
+      wx.cloud.callFunction({ name:'loginUser',
+        success:(res)=>{
+          wx.hideLoading()
+          if (res?.result?.success && res.result.openid){
+            wx.setStorageSync('openid', res.result.openid)
+            this.setData({ userOpenid: res.result.openid })
+            wx.showToast({ title:'已登录', icon:'success' })
+            // 登录后继续复制
+            this.copyParticipantWeChat(e)
+          } else {
+            wx.showToast({ title: res?.result?.message || '登录失败', icon:'none' })
           }
-        }
+        },
+        fail:(err)=>{ wx.hideLoading(); console.error('loginUser fail:', err); wx.showToast({ title:'登录失败', icon:'none' }) }
       })
       return
     }
+
     const wxid = e.currentTarget.dataset.wxid
     if (!wxid) return
     wx.setClipboardData({ data: wxid })
@@ -184,7 +192,7 @@ Page({
         const content = `有参与者微信被复制，乘客对你的请求（${date}，${route}）感兴趣`
         const touser  = d.publisher_id
         if (touser) {
-          wx.cloud.callFunction({ name: 'sendWeChatNotification', data: { touser, content } })
+          wx.cloud.callFunction({ name:'sendWeChatNotification', data:{ touser, content } })
         }
       }
     } catch (e) { /* 忽略通知失败 */ }

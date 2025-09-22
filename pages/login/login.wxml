@@ -1,4 +1,0 @@
-<view class="container">
-  <image class="logo" src="../../images/connection_lost.png"></image>
-  <text class="title">欢迎使用我的顺顺行</text>
-</view>
