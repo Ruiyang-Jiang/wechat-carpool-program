@@ -1,10 +1,52 @@
 // pages/publish/publish.js
 const { primeCities, searchCities, validateCity } = require('../../utils/us-cities-optimized.js')
 
-const DEBUG = true                         // <<< 统一开关
+const DEBUG = false                         // <<< 统一开关
 
 function log(...args){ DEBUG && console.log('[publish]', ...args) }
 function warn(...args){ DEBUG && console.warn('[publish]', ...args) }
+
+// 机场三字码 -> 城市映射（用于校验与提交，UI 可仍显示三字码）
+const AIRPORT_TO_CITY = {
+  AUS: { city: 'Austin',          state: 'TX' },
+  BNA: { city: 'Nashville',       state: 'TN' },
+  BOS: { city: 'Boston',          state: 'MA' },
+  BWI: { city: 'Baltimore',       state: 'MD' },
+  CLT: { city: 'Charlotte',       state: 'NC' },
+  DCA: { city: 'Washington',      state: 'DC' },
+  DEN: { city: 'Denver',          state: 'CO' },
+  DFW: { city: 'Dallas',          state: 'TX' },
+  DTW: { city: 'Detroit',         state: 'MI' },
+  EWR: { city: 'Newark',          state: 'NJ' },
+  FLL: { city: 'Fort Lauderdale', state: 'FL' },
+  IAD: { city: 'Washington',      state: 'DC' },
+  IAH: { city: 'Houston',         state: 'TX' },
+  ITH: { city: 'Ithaca',          state: 'NY' },
+  JFK: { city: 'New York',        state: 'NY' },
+  LAS: { city: 'Las Vegas',       state: 'NV' },
+  LAX: { city: 'Los Angeles',     state: 'CA' },
+  LGA: { city: 'New York',        state: 'NY' },
+  MCO: { city: 'Orlando',         state: 'FL' },
+  MIA: { city: 'Miami',           state: 'FL' },
+  MSP: { city: 'Minneapolis',     state: 'MN' },
+  ORD: { city: 'Chicago',         state: 'IL' },
+  PHL: { city: 'Philadelphia',    state: 'PA' },
+  PHX: { city: 'Phoenix',         state: 'AZ' },
+  SAN: { city: 'San Diego',       state: 'CA' },
+  SEA: { city: 'Seattle',         state: 'WA' },
+  SFO: { city: 'San Francisco',   state: 'CA' },
+  SLC: { city: 'Salt Lake City',  state: 'UT' },
+  TPA: { city: 'Tampa',           state: 'FL' }
+}
+function normalizePlace(place = {}){
+  const city = String(place?.city || '').trim()
+  const code = city.toUpperCase()
+  const mapped = AIRPORT_TO_CITY[code]
+  if (mapped){
+    return { city: mapped.city, state: mapped.state, lat: place.lat||null, lng: place.lng||null }
+  }
+  return place
+}
 
 Page({
   data:{
@@ -13,11 +55,11 @@ Page({
     todayString:   '',            // onLoad 中写入"YYYY-MM-DD"
     currentTime:   '',            // onLoad 中写入"HH:mm"
     userOpenid:    '',            // 用户登录状态
-  
+
     /* ------- 位置相关 ------- */
     departure_place:{ city:'', state:'', lat:null, lng:null },
     arrival_place:  { city:'', state:'', lat:null, lng:null },
-  
+
     /* ------- 出发信息 ------- */
     departure_date: '',           // 出发日期（picker）
     departure_time: '',           // 出发时间（picker）
@@ -26,7 +68,7 @@ Page({
     passenger_number:1,           // 乘客模式：乘客人数
     price:          '',           // 价格/人
     contact_wechat: '',           // 微信号
-  
+
     /* ------- 下拉联想 ------- */
     departureSuggestions: [],     // 出发城市建议列表
     arrivalSuggestions:  [],      // 目的城市建议列表
@@ -53,7 +95,7 @@ Page({
     const userInfo = wx.getStorageSync('userInfo')||{}
     if(userInfo.wechat) this.setData({ contact_wechat:userInfo.wechat })
     log('cached wechat', userInfo.wechat||'none')
-    
+
     // 检查登录状态
     this.checkLoginStatus()
   },
@@ -147,11 +189,16 @@ Page({
     const mode     = d.currentSubTab === 'passenger' ? 'request' : 'ride'
     const funcName = mode === 'ride' ? 'createRide' : 'createRideRequest'
 
+    // —— 在校验前做机场码映射（JFK/EWR/LGA 等 -> 对应城市） ——
+    const depN   = normalizePlace(d.departure_place)
+    const arrN   = normalizePlace(d.arrival_place)
+    const stopsN = Array.isArray(d.stopovers) ? d.stopovers.map(normalizePlace) : []
+
     /* ========== 基础校验（所有情况都要） ========== */
-    if (!d.departure_place.city || !validateCity(d.departure_place.city)){
+    if (!depN.city || !validateCity(depN.city)){
       return wx.showToast({ title:'请选择有效的出发城市', icon:'none' })
     }
-    if (!d.arrival_place.city || !validateCity(d.arrival_place.city)){
+    if (!arrN.city || !validateCity(arrN.city)){
       return wx.showToast({ title:'请选择有效的目的城市', icon:'none' })
     }
     if (!d.departure_date){
@@ -188,8 +235,8 @@ Page({
 
     /* ========== 构造 payload & 调云函数 ========== */
     const payload = {
-      departure_place: d.departure_place,
-      arrival_place:   d.arrival_place,
+      departure_place: depN,
+      arrival_place:   arrN,
       departure_date:  d.departure_date,
       departure_time:  d.departure_time,
       price:           Number(d.price),
@@ -201,7 +248,7 @@ Page({
       empty_seats:     mode==='ride'
                         ? parseInt(d.empty_seats,10)
                         : 0,
-      stopovers:       d.stopovers
+      stopovers:       stopsN
     }
 
     // 防止重复提交
@@ -303,7 +350,7 @@ Page({
   // 通过云函数进行登录
   loginViaCloudFunction() {
     wx.showLoading({ title: '登录中...', mask: true })
-    
+
     // 调用登录云函数
     wx.cloud.callFunction({
       name: 'loginUser',
@@ -316,9 +363,9 @@ Page({
           this.setData({ userOpenid: res.result.openid })
           wx.showToast({ title: '登录成功', icon: 'success' })
         } else {
-          wx.showToast({ 
-            title: res.result?.message || '登录失败', 
-            icon: 'none' 
+          wx.showToast({
+            title: res.result?.message || '登录失败',
+            icon: 'none'
           })
         }
       },
