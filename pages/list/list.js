@@ -289,6 +289,11 @@ Page({
     const field = passengerSortFields[passengerSortFieldIndex].value
     const order = passengerSortOrderOptions[passengerSortOrderIndex].value
     return data.sort((a, b) => {
+      // 先确保未过期排前、已过期排后
+      const pastA = new Date(`${a.departure_date} ${a.departure_time || '00:00'}`).getTime() < Date.now()
+      const pastB = new Date(`${b.departure_date} ${b.departure_time || '00:00'}`).getTime() < Date.now()
+      if (pastA !== pastB) return pastA ? 1 : -1
+
       if (field === 'departure_date_time') {
         const valA = `${a.departure_date} ${a.departure_time || '00:00'}`
         const valB = `${b.departure_date} ${b.departure_time || '00:00'}`
@@ -317,6 +322,11 @@ Page({
     const field = driverSortFields[driverSortFieldIndex].value
     const order = driverSortOrderOptions[driverSortOrderIndex].value
     return data.sort((a, b) => {
+      // 先确保未过期排前、已过期排后
+      const pastA = new Date(`${a.departure_date} ${a.departure_time || '00:00'}`).getTime() < Date.now()
+      const pastB = new Date(`${b.departure_date} ${b.departure_time || '00:00'}`).getTime() < Date.now()
+      if (pastA !== pastB) return pastA ? 1 : -1
+
       if (field === 'departure_date_time') {
         const valA = `${a.departure_date} ${a.departure_time || '00:00'}`
         const valB = `${b.departure_date} ${b.departure_time || '00:00'}`
