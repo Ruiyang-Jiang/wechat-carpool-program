@@ -6,14 +6,16 @@
 
 <!-- 页面提示信息 -->
 <view class="page-tip" wx:if="{{!hasExactMatchResults && !hasStopoverMatch && shouldShowPageTip}}">
-  <view class="tip-icon">ℹ️</view>
   <view class="tip-content">
-    <view class="tip-text" wx:if="{{currentView==='passenger'}}">目前显示为最近一周的车找人</view>
-    <view class="tip-text" wx:if="{{currentView==='driver'}}">目前显示为最近一周的人找车</view>
-    <view class="tip-subtext">请通过首页搜索来寻找特定的需求</view>
+    <view class="tip-header">
+      <view class="tip-icon">ℹ️</view>
+      <view class="tip-title">{{currentView==='passenger' ? '当前展示：最近一周的车找人' : '当前展示：最近一周的人找车'}}</view>
+    </view>
+    <view class="tip-actions">
+      <button class="tip-refresh" bindtap="refreshData">刷新</button>
+    </view>
   </view>
 </view>
-<button class="refresh-btn" bindtap="refreshData" wx:if="{{!hasExactMatchResults && shouldShowPageTip}}">刷新</button>
 
 <!-- ========================== 找乘客 ========================== -->
 <block wx:if="{{currentView==='passenger'}}">
