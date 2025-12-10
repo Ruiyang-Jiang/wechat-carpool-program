@@ -51,7 +51,17 @@ Page({
 
   /* ---------------- 页面初始化 ---------------- */
   async initPage() {
-    const openid = wx.getStorageSync('openid')
+    let openid = wx.getStorageSync('openid')
+    // 自动登录，避免未登录导致“我发布”看不到最新数据
+    if (!openid) {
+      try {
+        const res = await wx.cloud.callFunction({ name: 'loginUser' })
+        if (res?.result?.success && res.result.openid) {
+          openid = res.result.openid
+          wx.setStorageSync('openid', openid)
+        }
+      } catch (e) { /* ignore login failure,保持未登录状态 */ }
+    }
     if (!openid) { this.setData({ loggedIn: false, userInfo: {} }); return }
 
     const userRes = await db.collection('users').doc(openid).get().catch(() => ({}))
@@ -98,10 +108,14 @@ Page({
   },
 
   async loadMyPublished(openid) {
-    const res = await db.collection('rides').where({
-      publisher_id: openid,
-      status: _.neq('closed')  // 过滤掉已关闭的记录
-    }).get()
+    const res = await db.collection('rides')
+      .where({
+        publisher_id: openid,
+        status: _.neq('closed')  // 过滤掉已关闭的记录
+      })
+      .orderBy('created_at', 'desc')
+      .limit(50)
+      .get()
     this.setData({ myPublished: sortByDateDesc(res.data).map(decorate) })
   },
 

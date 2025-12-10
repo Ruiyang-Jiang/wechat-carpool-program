@@ -111,37 +111,14 @@ Page({
 
   /* ============ 加载「车找人」(ride) ============ */
   loadPassengerData () {
-    // 优先使用搜索结果
-    const searchResults = wx.getStorageSync('searchResults')
-    if (searchResults && Array.isArray(searchResults) && searchResults.length && searchResults[0].type === 'ride') {
-      const sorted = this.sortPassenger(searchResults).map(item => {
-        const decorated = decorate(item)
-        // 添加匹配类型标识
-        if (item.matchType) {
-          decorated.matchType = item.matchType
-          decorated.matchLabel = this.getMatchLabel(item.matchType)
-        }
-
-        return decorated
-      })
-      
-      // 检查是否有精确匹配的结果
-      const hasExactMatch = sorted.some(item => item.matchType === 'exact')
-      const hasStopoverMatch = sorted.some(item => item.matchType === 'stopover')
-      this.setData({ 
-        passengerData: sorted, 
-        passengerEmpty: sorted.length === 0,
-        hasExactMatchResults: hasExactMatch,
-        hasStopoverMatch: hasStopoverMatch,
-        shouldShowPageTip: false  // 有搜索结果（含途经点匹配）不显示页面提示
-      })
-      
-      // 清除搜索结果缓存
-      // 保留搜索结果以便返回时继续显示
+    // ??????????????????
+    const saved = wx.getStorageSync('carSearch')
+    if (saved && saved.departure_place && saved.arrival_place && saved.departure_date) {
+      this.fetchLatestSearch('ride', saved, 'passenger')
       return
     }
 
-    // 默认加载最近一周的数据
+    // ????????????????
     this.setData({ hasExactMatchResults: false, hasStopoverMatch: false, shouldShowPageTip: true })
     this.loadRecentPassengerData()
   },
@@ -184,36 +161,14 @@ Page({
 
   /* ============ 加载「人找车」(request) ============ */
   loadDriverData () {
-    // 优先使用搜索结果
-    const searchResults = wx.getStorageSync('searchResults')
-    if (searchResults && Array.isArray(searchResults) && searchResults.length && searchResults[0].type === 'request') {
-      const sorted = this.sortDriver(searchResults).map(item => {
-        const decorated = decorate(item)
-        // 添加匹配类型标识
-        if (item.matchType) {
-          decorated.matchType = item.matchType
-          decorated.matchLabel = this.getMatchLabel(item.matchType)
-        }
-        return decorated
-      })
-      
-      // 检查是否有精确匹配的结果
-      const hasExactMatch = sorted.some(item => item.matchType === 'exact')
-      const hasStopoverMatch = sorted.some(item => item.matchType === 'stopover')
-      this.setData({ 
-        driverData: sorted, 
-        driverEmpty: sorted.length === 0,
-        hasExactMatchResults: hasExactMatch,
-        hasStopoverMatch: hasStopoverMatch,
-        shouldShowPageTip: false  // 有搜索结果（含途经点匹配）不显示页面提示
-      })
-      
-      // 清除搜索结果缓存
-      // 保留搜索结果以便返回时继续显示
+    // ??????????????????
+    const saved = wx.getStorageSync('peopleSearch')
+    if (saved && saved.departure_place && saved.arrival_place && saved.departure_date) {
+      this.fetchLatestSearch('request', saved, 'driver')
       return
     }
 
-    // 默认加载最近一周的数据
+    // ????????????????
     this.setData({ hasExactMatchResults: false, hasStopoverMatch: false, shouldShowPageTip: true })
     this.loadRecentDriverData()
   },
@@ -270,6 +225,69 @@ Page({
     })
     // 重新加载最近一周的数据
     this.loadDriverData()
+  },
+
+  // 统一按保存的搜索条件取最新结果，避免缓存导致新发布不显示
+  fetchLatestSearch(type, params, view) {
+    wx.cloud.callFunction({
+      name: 'searchRides',
+      data: {
+        type,
+        departure_place: params.departure_place,
+        arrival_place:   params.arrival_place,
+        departure_date:  params.departure_date
+      },
+      success: (res) => {
+        if (!res.result || !res.result.ok) {
+          this.setData({ hasExactMatchResults: false, hasStopoverMatch: false, shouldShowPageTip: true })
+          return
+        }
+        const list = Array.isArray(res.result.data) ? res.result.data : []
+
+        if (view === 'passenger') {
+          const sorted = this.sortPassenger(list).map(item => {
+            const decorated = decorate(item)
+            if (item.matchType) {
+              decorated.matchType = item.matchType
+              decorated.matchLabel = this.getMatchLabel(item.matchType)
+            }
+            return decorated
+          })
+          const hasExactMatch = sorted.some(item => item.matchType === 'exact')
+          const hasStopoverMatch = sorted.some(item => item.matchType === 'stopover')
+          this.setData({
+            passengerData: sorted,
+            passengerEmpty: sorted.length === 0,
+            hasExactMatchResults: hasExactMatch,
+            hasStopoverMatch: hasStopoverMatch,
+            shouldShowPageTip: sorted.length === 0
+          })
+          wx.setStorageSync('searchResults', sorted)
+        } else {
+          const sorted = this.sortDriver(list).map(item => {
+            const decorated = decorate(item)
+            if (item.matchType) {
+              decorated.matchType = item.matchType
+              decorated.matchLabel = this.getMatchLabel(item.matchType)
+            }
+            return decorated
+          })
+          const hasExactMatch = sorted.some(item => item.matchType === 'exact')
+          const hasStopoverMatch = sorted.some(item => item.matchType === 'stopover')
+          this.setData({
+            driverData: sorted,
+            driverEmpty: sorted.length === 0,
+            hasExactMatchResults: hasExactMatch,
+            hasStopoverMatch: hasStopoverMatch,
+            shouldShowPageTip: sorted.length === 0
+          })
+          wx.setStorageSync('searchResults', sorted)
+        }
+      },
+      fail: () => {
+        this.setData({ hasExactMatchResults: false, hasStopoverMatch: false, shouldShowPageTip: true })
+      }
+    })
   },
 
   /* ---------------- 排序逻辑 ---------------- */
